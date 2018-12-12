@@ -1,0 +1,82 @@
+{
+  "ExtensionName": {
+    "message": "PapaTab",
+    "description": "Main: PapaTab"
+  },
+  "topics": {
+    "message": "Topics",
+    "description": "Sidebar: Topics"
+  },
+  "windows": {
+    "message": "Windows",
+    "description": "Sidebar: Windows"
+  },
+  "AddNewWindow": {
+    "message": "Add new Windows",
+    "description": "Sidebar: Add a new Windows"
+  },
+  "AddNewTopic": {
+    "message": "Add new Topic",
+    "description": "Sidebar: Add a new Topic"
+  },
+  "OpenTabs": {
+    "message": "Open Tabs",
+    "description": "Main: Open Tabs"
+  },
+  "SavedTabs": {
+    "message": "Favorite Tabs",
+    "description": "Main: Saved/Favorite Tabs"
+  },
+  "SaveAsTopic": {
+    "message": "Save as Topic",
+    "description": "Main: Save/Convert Window as Topic"
+  },
+  "modalCreateNewTopic": {
+    "message": "Create a new Topic",
+    "description": "Modal Add Topic: Title"
+  },
+  "modalTopicName": {
+    "message": "Name",
+    "description": "Modal Add Topic: Topic Name"
+  },
+  "modalInputNamePlaceholder": {
+    "message": "Input desired name of the new topic here",
+    "description": "Modal Add Topic: Topic Name placeholder"
+  },
+  "modalTopicColor": {
+    "message": "Color",
+    "description": "Modal Add Topic: Topic Color"
+  },
+  "Cancel": {
+    "message": "Cancel",
+    "description": "Modal: Cancel Create Topic"
+  },
+  "Create": {
+    "message": "Create",
+    "description": "Modal: Create Topic"
+  },
+  "Close": {
+    "message": "Close",
+    "description": "General: To close something"
+  },
+  "SaveTab": {
+    "message": "Remember",
+    "description": "General: Save a tab"
+  },
+  "UnsaveTab": {
+    "message": "Forget",
+    "description": "General: Unsave a tab"
+  },
+  "Pin": {
+    "message": "Pin",
+    "description": "General: Pin a tab"
+  },
+  "Unpin": {
+    "message": "Unpin",
+    "description": "General: Unpin a tab"
+  },
+  "topicAddFailed": {
+    "message": "Unable to store Topic. Please check the name and try again.",
+    "description": "Modal: Adding Topic Failed"
+  }
+}

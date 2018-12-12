@@ -1,0 +1,181 @@
+@font-face {
+  font-family: 'Raleway';
+  font-style: normal;
+  src: url(../fonts/Raleway-v4020-Regular.otf);
+}
+
+.tabsList {
+  width: 800px;
+}
+
+/* truncate text in a div */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.drag-handle {
+  margin-right: 10px;
+  cursor: move;
+  cursor: -webkit-grabbing;  /* overrides 'move' */
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fa-plus-circle:hover {
+  color: #bbb;
+}
+
+/* Tooltip container */
+.tooltip {
+  position: relative;
+  /*display: block;*/
+  outline: 1px solid transparent;
+}
+/* Tooltip text */
+.tooltiptext {
+  visibility: hidden;
+  padding: 5px 0;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 4;
+  top: 26px;
+  right: 2%;
+  opacity: 0.5;
+  font-size: 12px;
+  background-color: unset !important;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+.tooltip#tipCloseTab:hover + .tooltiptext {
+  visibility: visible;
+}
+.tooltip#tipPinTab:hover + .tooltiptext {
+  visibility: visible;
+}
+.tooltip#tipFavoriteTab:hover + .tooltiptext {
+  visibility: visible;
+}
+.tooltip#tipSaveAsTopic:hover + .tooltiptext {
+  visibility: visible;
+}
+/* input validation */
+input:invalid {
+  animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  border-bottom: 3px dotted red !important;
+}
+
+@keyframes shake {
+  10%, 90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%, 80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%, 50%, 70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%, 60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
+.my-zoom-hover:hover {
+  transition :transform 0.2s ease-in-out;
+  transform: scale(1.5);
+  opacity: 0.8 !important;
+}
+
+li.pinned:after {
+  content: "(pinned)";
+  background-color: blue;
+}
+
+.sortable-ghost {
+  opacity: .2;
+}
+
+/* show hidden (help text)*/
+.hidden-info {
+  position: relative;
+  /*display: inline-block;*/
+}
+.hidden-info .hidden-text {
+  visibility: hidden;
+  /*display:none;*/
+}
+.hidden-info:hover .hidden-text {
+  visibility: visible;
+  /*display: inline-block; */
+}
+
+.small-padding {
+  padding:2px 2px !important;
+}
+
+.tabStatusBar {
+  position: absolute;
+  right: 5px;
+}
+
+.mainHeader h4 {
+  font-size: 10vh;
+  text-orientation: mixed;
+  writing-mode: horizontal-tb;
+  opacity: 0.7;
+  position: fixed;
+  top: 90%;
+  right: 2%;
+  transform: translate(0%, -50%);
+  text-align: right;
+  color: #FFFFFF;
+  text-shadow: 6px 5px 5px #FFFFFF;
+  user-select: none;
+}
+@keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 0.8; }
+}
+
+.statusSelected i {
+  filter: opacity(1.0) !important;
+}
+
+/*region Main view color chooser */
+.colorChooser {
+  -webkit-appearance: none;
+  padding: 0;
+  border: none;
+  border-radius: 32px;
+  width: 20px;
+  height: 20px;
+}
+.colorChooser::-webkit-color-swatch {
+  border: none;
+  border-radius: 32px;
+  padding: 0;
+}
+.colorChooser::-webkit-color-swatch-wrapper {
+  border: none;
+  border-radius: 32px;
+  padding: 0;
+}
+/*endregion*/
+
+.flex-container {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}

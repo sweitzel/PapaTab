@@ -1,0 +1,78 @@
+{
+  "ExtensionName": {
+    "message": "PapaTab",
+    "description": "Main: PapaTab"
+  },
+  "topics": {
+    "message": "Themen",
+    "description": "Sidebar: Topics"
+  },
+  "windows": {
+    "message": "Fenster",
+    "description": "Sidebar: Windows"
+  },
+  "AddNewWindow": {
+    "message": "Neues Fenster",
+    "description": "Sidebar: Add a new Windows"
+  },
+  "AddNewTopic": {
+    "message": "Thema anlegen",
+    "description": "Sidebar: Add a new Topic"
+  },
+  "OpenTabs": {
+    "message": "Offene Tabs",
+    "description": "Main: Open Tabs"
+  },
+  "SavedTabs": {
+    "message": "Gemerkte Tabs",
+    "description": "Main: Saved/Favorite Tabs"
+  },
+  "SaveAsTopic": {
+    "message": "Als Thema speichern",
+    "description": "Main: Save/Convert Window as Topic"
+  },
+  "modalAddTopic1": {
+    "message": "Neues Thema anlegen",
+    "description": "Modal Add Topic: Title"
+  },
+  "modalAddTopic2": {
+    "message": "Name",
+    "description": "Modal Add Topic: Topic Name"
+  },
+  "modalAddTopic3": {
+    "message": "Farbe",
+    "description": "Modal Add Topic: Topic Color"
+  },
+  "Cancel": {
+    "message": "Abbrechen",
+    "description": "Modal: Cancel Create Topic"
+  },
+  "Create": {
+    "message": "Anlegen",
+    "description": "Modal: Create Topic"
+  },
+  "Close": {
+    "message": "Schließen",
+    "description": "General: To close something"
+  },
+  "Pin": {
+    "message": "Anheften",
+    "description": "General: Pin a tab"
+  },
+  "Unpin": {
+    "message": "Ablösen",
+    "description": "General: Unpin a tab"
+  },
+  "SaveTab": {
+    "message": "Merken",
+    "description": "General: Save a tab"
+  },
+  "UnsaveTab": {
+    "message": "Vergessen",
+    "description": "General: Unsave a tab"
+  },
+  "topicAddFailed": {
+    "message": "Thema kann nicht gespeichert werden, bitte korrigieren sie den Namen.",
+    "description": "Modal: Adding Topic Failed"
+  }
+}

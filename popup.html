@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title id='gsTitle'>PapaTabs</title>
+  <link rel="stylesheet" href="css/fontawesome-all.css">
+  <link rel="stylesheet" href="css/w3.css">
+  <link rel="stylesheet" href="css/light.css" id="lightTheme" title="Light">
+  <link rel="stylesheet" href="css/dark.css" id="darkTheme" title="Dark">
+  <link rel="stylesheet" href="css/other.css">
+  <link rel="stylesheet" href="css/switch.css">
+  <script type="text/javascript" src="js/browser-polyfill.js"></script>
+  <script type="text/javascript" src="js/dexie.js"></script>
+  <script type="text/javascript" src="js/Sortable.js"></script>
+  <script type="text/javascript" src="js/punycode.js"></script>
+  <script type="text/javascript" src="js/papatabs.js"></script>
+  <script type="text/javascript" src="js/popup.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<style>
+  html, body, h1, h2, h3, h4, h5 {
+    font-family: "Raleway", sans-serif
+  }
+</style>
+<body class="w3-theme-l4">
+
+<!-- Top container -->
+<div class="w3-bar w3-top w3-theme-dark w3-large" style="z-index:4">
+  <button id="butSidebarMenu" class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey">
+    <i class="fa fa-bars"></i>Menu
+  </button>
+  <span class="w3-bar-item w3-right" data-localize="__MSG_ExtensionName__">PapaTab</span>
+</div>
+
+<!-- PopupSidebar/menu -->
+<div id="divSidebar" class="w3-sidebar w3-collapse w3-theme-dark w3-animate-left" style="z-index:3;width:300px;height:96%;overflow-x:hidden;">
+  <nav id="navSidebar">
+    <div>
+      <div class="w3-border-bottom w3-large w3-margin-bottom tooltip">
+        <span class="w3-margin-left" data-localize="__MSG_Topics__">Topics</span>
+        <i id="butAddTopic" class="w3-right w3-padding my-zoom-hover fa fa-plus-circle"></i>
+        <span class="tooltiptext" data-localize="__MSG_AddNewTopic__">Add a new Topic</span>
+      </div>
+      <ul id="ulSidebarTopics"></ul>
+      <div class="w3-border-bottom w3-large w3-margin-top w3-margin-bottom tooltip">
+        <span class="w3-margin-left" data-localize="__MSG_Windows__">Windows</span>
+        <i id="butAddWindow" class="w3-right w3-padding my-zoom-hover fa fa-plus-circle"></i>
+        <span class="w3-theme-dark tooltiptext" data-localize="__MSG_AddNewWindow__">Add a new Window</span>
+      </div>
+      <ul id="ulSidebarWindows"></ul>
+      <div class="w3-bar-item w3-bottom w3-center">
+        <i class="w3-xlarge fa fa-toggle-off"> Light Theme</i>
+      </div>
+    </div>
+  </nav>
+  <div id="divRecycle" class="w3-display-bottommiddle w3-margin-bottom w3-button w3-hover-text-deep-orange">
+    <i id="butRecycle" class="my-zoom-hover fa fa-trash-alt w3-xlarge w3-padding"></i>Move to Recycle Bin
+  </div>
+</div>
+
+<!-- Overlay effect when opening sidebar on small screens -->
+<div class="w3-overlay w3-hide-large w3-animate-opacity" style="cursor:pointer" title="close side menu"
+     id="divOverlay"></div>
+
+<!-- !PAGE CONTENT! -->
+<div class="w3-main" style="margin-left:300px;margin-top:43px;">
+  <!-- Header -->
+  <header id="hMainHeader" class="w3-container mainHeader"/>
+  <h4>Current Window</h4>
+  </header>
+
+  <div id="divMain" class="w3-container w3-margin">
+    <div id="divOptions"></div>
+    <div class="flex-container">
+      <div id="divMainOpenTabs" style="padding: 10px">
+        <div class="w3-border-bottom w3-large w3-margin-bottom" data-localize="__MSG_OpenTabs__">Open Tabs</div>
+        <ul id="ulMainActiveTabs" class="w3-ul w3-card w3-large tabsList"></ul>
+      </div>
+      <div id="divMainSavedTabs" style="margin: 10px">
+        <div class="w3-border-bottom w3-large w3-margin-bottom" data-localize="__MSG_SavedTabs__">Saved Tabs</div>
+        <ul id="ulMainSavedTabs" class="w3-ul w3-card w3-large tabsList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add new Space -->
+  <div id="modalAddTopic" class="w3-modal"/>
+  <!-- End page content -->
+</div>
+
+</body>
+</html>

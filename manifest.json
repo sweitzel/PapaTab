@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+  "name": "Papatabs",
+  "version": "0.1",
+  "description": "Just another tab and session manager extension",
+  "default_locale": "en",
+  "background": {
+    "scripts": [
+      "js/browser-polyfill.js",
+      "js/dexie.js",
+      "js/papatabs.js",
+      "js/background.js"
+    ],
+    "persistent": false
+  },
+  "icons": {
+    "16": "icon16.png",
+    "64": "icon64.png",
+    "128": "icon128.png"
+  },
+  "browser_action": {
+    "default_title": "Open Papatab overview"
+  },
+  "optional_permissions": [ "bookmarks", "management", "system.memory" ],
+  "permissions": [ "tabs", "activeTab", "sessions", "contextMenus", "notifications", "storage", "chrome://favicon/" ],
+  "minimum_chrome_version": "54"
+}
