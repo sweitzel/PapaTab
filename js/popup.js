@@ -271,7 +271,7 @@ class PopupSidebar {
       this.removeTopic(params.detail);
     });
     // listen to global 'AddTopic' (received from other chrome window)
-    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
       // endpoints called by popup.js
       let topic;
       switch (request.action) {
@@ -279,22 +279,18 @@ class PopupSidebar {
           console.debug("Chrome AddTopic event received: detail=%O", request.detail);
           this.addTopic(request.detail);
           return true;
-          break;
         case 'TopicRemove':
           console.debug("Chrome TopicRemove event received: detail=%O", request.detail);
           this.removeTopic(request.detail);
           return true;
-          break;
         case 'TopicMove':
           console.debug("Chrome TopicMove event received: detail=%O", request.detail);
           this.moveTopic(request.detail);
           return true;
-          break;
         case 'TopicInfoUpdated':
           console.debug("Custom TopicTabsUpdated event received: detail=%O", request.detail);
           this.updateTopicInfo(request.detail);
           return true;
-          break;
         case 'TopicLoaded':
           console.debug("Chrome TopicLoaded event received: detail=%O", request.detail);
           // a WindowCreated event can happen before TopicLoaded is received, therefore first cleanup the window
@@ -309,7 +305,6 @@ class PopupSidebar {
             topic.setOpen();
           }
           return true;
-          break;
         case 'WindowCreated':
           console.log("WindowCreated topics=%O", this.topics);
           if (this.windows.find(win => win.id === request.detail.window.id)) {
@@ -326,7 +321,6 @@ class PopupSidebar {
             this.addWindow(request.detail.window);
           }
           return true;
-          break;
         case 'WindowRemoved':
           console.debug("Chrome WindowRemoved received: detail=%O", request.detail);
           if (topic = this.getTopicForWindowId(request.detail.windowId)) {
@@ -336,11 +330,10 @@ class PopupSidebar {
             this.removeWindow(request.detail.windowId);
           }
           return true;
-          break;
         case 'UpdateWindowOrTopicInfo':
           console.debug("Chrome UpdateWindowOrTopicInfo received: detail=%O", request.detail);
           this.updateTopicOrWindowInfo(request.detail.windowId);
-          break;
+          return true;
       }
     });
     // when add topic button clicked, dispatch to modal
@@ -558,7 +551,7 @@ class PopupMain {
           console.log("Topic Name update succeeded");
           // update main
           this.pt.refMain.updateTitle(inputName.value, inputColor.value);
-          this.pt.refMain.updateFavicon(inputName.value, inputColor.value);
+          PopupMain.updateFavicon(inputName.value, inputColor.value);
           this.pt.whoIAm.currentTopic.name = inputName.value;
           // update sidebar
           this.pt.refSidebar.updateTopicInfo({
@@ -595,7 +588,7 @@ class PopupMain {
           console.log("Topic Color update succeeded");
           // update main
           this.pt.refMain.updateTitle(inputName.value, inputColor.value);
-          this.pt.refMain.updateFavicon(inputName.value, inputColor.value);
+          PopupMain.updateFavicon(inputName.value, inputColor.value);
           // update sidebar
           this.pt.refSidebar.updateTopicInfo({
             topicId: this.pt.whoIAm.currentTopic.id,
@@ -675,18 +668,6 @@ class PopupMain {
 
     this.nodes.header.innerHTML = '';
     this.nodes.header.appendChild(title);
-  }
-
-  updateFavicon(title, color) {
-    let favUrl = createFavicon(title, color);
-    if (favUrl) {
-      favUrl.id = "favicon";
-      let head = document.getElementsByTagName('head')[0];
-      if (document.getElementById('favicon')) {
-        head.removeChild(document.getElementById('favicon'));
-      }
-      head.appendChild(favUrl);
-    }
   }
 
   // add a tab to topic or window
@@ -789,6 +770,18 @@ class PopupMain {
   }
   */
 
+  static updateFavicon(title, color) {
+    let favUrl = createFavicon(title, color);
+    if (favUrl) {
+      favUrl.id = "favicon";
+      let head = document.getElementsByTagName('head')[0];
+      if (document.getElementById('favicon')) {
+        head.removeChild(document.getElementById('favicon'));
+      }
+      head.appendChild(favUrl);
+    }
+  }
+
   registerEvents() {
     // listen to global events (received from other chrome window or background script)
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -806,7 +799,6 @@ class PopupMain {
             });
           }
           return true;
-          break;
         case 'TabRemoved':
           if (this.pt.whoIAm.currentWindow.id === request.detail.removeInfo.windowId) {
             console.debug("Chrome TabRemoved received: detail=%O", request.detail);
@@ -819,7 +811,6 @@ class PopupMain {
             });
           }
           return true;
-          break;
         case 'TabMoved':
           if (this.pt.whoIAm.currentWindow.id === request.detail.moveInfo.windowId) {
             console.debug("Chrome TabMoved received: detail=%O", request.detail);
@@ -832,7 +823,6 @@ class PopupMain {
             });
           }
           return true;
-          break;
         case 'TabUpdated':
           if (request.detail.tab && this.pt.whoIAm.currentWindow.id === request.detail.tab.windowId) {
             console.debug("Chrome TabUpdated received: detail=%O", request.detail);
@@ -848,7 +838,6 @@ class PopupMain {
             }
           }
           return true;
-          break;
       }
     });
   }
@@ -910,7 +899,7 @@ class Topic {
     // color-icon
     this.icon = document.createElement('img');
     this.icon.classList.add('w3-bar-item', 'w3-image', 'w3-circle', 'drag-handle');
-    let favLink = createFavicon(this.name, this.color)
+    let favLink = createFavicon(this.name, this.color);
     if (favLink) {
       this.icon.setAttribute('src', favLink.href);
     }
@@ -945,7 +934,7 @@ class Topic {
     if (this.windowId === this.pt.whoIAm.currentWindow.id) {
       this.li.classList.add('statusSelected');
       this.pt.refMain.updateTitle(this.name, this.color);
-      this.pt.refMain.updateFavicon(this.name, this.color);
+      PopupMain.updateFavicon(this.name, this.color);
     }
     this.isOpen().then(result => {
       if (result) {
@@ -954,18 +943,18 @@ class Topic {
     });
 
     //add event listener for each tab link
-    this.li.onmouseenter = () => {
+    this.li.addEventListener('mouseenter', () => {
       //this.li.style = `border-left: 5px solid ${this.color}`;
       //this.icon.style.filter = 'opacity(100%)';
       this.li.classList.add('statusSelected');
-    };
-    this.li.onmouseleave = () => {
+    });
+    this.li.addEventListener('mouseleave', () => {
       //this.li.style = "border-left: 0; margin-left: 5px";
       //this.icon.style.filter = 'opacity(20%)';
       if (this.windowId !== this.pt.whoIAm.currentWindow.id) {
         this.li.classList.remove('statusSelected');
       }
-    };
+    });
     this.li.onclick = (e) => {
       e.preventDefault();
       this.load()
@@ -1192,7 +1181,7 @@ class BrowsingWindow {
     // id might be undefined - means its a new topic to be saved
     this.id = window.id;
     this.window = window;
-    this.title = "Default Name";
+    this.title = "Window";
     // li element in sidebar
     this.li = "";
     this.icon = {};
@@ -1216,7 +1205,7 @@ class BrowsingWindow {
     // color-icon
     this.icon = document.createElement('img');
     this.icon.classList.add('w3-bar-item', 'w3-image', 'w3-circle', 'drag-handle');
-    let favLink = createFavicon('W', '#ccc')
+    let favLink = createFavicon(this.title.charAt(0).toUpperCase(), '#ccc');
     if (favLink) {
       this.icon.setAttribute('src', favLink.href);
     }
@@ -1237,12 +1226,12 @@ class BrowsingWindow {
     }
 
     //add event listener for each tab link
-    this.li.onmouseenter = () => {
+    this.li.addEventListener('mouseenter', () => {
       this.icon.style.filter = 'opacity(100%)';
-    };
-    this.li.onmouseleave = () => {
+    });
+    this.li.addEventListener('mouseleave', () => {
       this.icon.style.filter = 'opacity(20%)';
-    };
+    });
 
     // activate the window
     this.li.onclick = (e) => {
@@ -1301,6 +1290,11 @@ class BrowsingWindow {
     this.constructWindowTitle().then(() => {
       let div = this.li.getElementsByTagName('div')[0];
       div.innerText = this.title;
+      // update Sidebar Icon
+      let favLink = createFavicon(this.title.charAt(0).toUpperCase(), '#ccc')
+      if (favLink) {
+        this.icon.setAttribute('src', favLink.href);
+      }
       if (this.pt.whoIAm.currentWindow.id === this.id) {
         // update popup title (Chrome Window Title) if this is the title of current window
         document.title = this.title;
@@ -1383,7 +1377,7 @@ class ModalAddTopic {
     let spanClose = document.createElement('span');
     spanClose.classList.add('w3-button', 'w3-xlarge', 'w3-hover-deep-orange', 'w3-display-topright');
     spanClose.title = getTranslationFor('Close');
-    spanClose.innerHTML = '&times;'
+    spanClose.innerHTML = '&times;';
     divCard.appendChild(spanClose);
 
     // headline
@@ -1399,7 +1393,7 @@ class ModalAddTopic {
     form.classList.add('w3-container', 'w3-padding-16');
 
     // section: name
-    let divName = document.createElement('div')
+    let divName = document.createElement('div');
     divName.classList.add('w3-section');
     let labelName = document.createElement('label');
     labelName.innerText = getTranslationFor('modalTopicName');
@@ -1703,10 +1697,10 @@ class Tab {
   close() {
     browser.tabs.remove(this.id)
       .then(() => {
-        console.debug("Tab.close() for id=%d performed", this.id)
+        console.debug("Tab.close() for id=%d performed", this.id);
       })
       .catch(err => {
-        console.error("Tab.close() failed; %s", err)
+        console.error("Tab.close() failed; %s", err);
       });
   }
 
@@ -1714,7 +1708,7 @@ class Tab {
     if (this.tab.pinned) {
       browser.tabs.update(this.id, {pinned: false})
         .then(() => {
-          console.debug("Tab.togglePinned() for id=%d performed (unpin)", this.id)
+          console.debug("Tab.togglePinned() for id=%d performed (unpin)", this.id);
           this.tab.pinned = false;
         })
         .catch(err => {
@@ -1723,7 +1717,7 @@ class Tab {
     } else {
       browser.tabs.update(this.id, {pinned: true})
         .then(() => {
-          console.debug("Tab.togglePinned() for id=%d performed (pin)", this.id)
+          console.debug("Tab.togglePinned() for id=%d performed (pin)", this.id);
           this.tab.pinned = true;
         })
         .catch(err => {

@@ -197,7 +197,7 @@ function createFavicon(title, color) {
     return item[0]
   }).join('').substr(0, 2);
 
-  let fontSize = measureText(ctx, acronym, 'Arial', 0, 80, 60);
+  let fontSize = measureText(ctx, acronym, 'Arial', 0, 60, 50);
   ctx.font = `bold ${fontSize}px "Arial"`;
   ctx.textAlign='center';
   ctx.textBaseline="middle";
@@ -218,9 +218,9 @@ function createFavicon(title, color) {
 function hex2rgba(hex, opacity){
   // https://stackoverflow.com/questions/21646738/convert-hex-to-rgba
   hex = hex.replace('#','');
-  r = parseInt(hex.substring(0, hex.length/3), 16);
-  g = parseInt(hex.substring(hex.length/3, 2*hex.length/3), 16);
-  b = parseInt(hex.substring(2*hex.length/3, 3*hex.length/3), 16);
+  const r = parseInt(hex.substring(0, hex.length/3), 16);
+  const g = parseInt(hex.substring(hex.length/3, 2*hex.length/3), 16);
+  const b = parseInt(hex.substring(2*hex.length/3, 3*hex.length/3), 16);
   return 'rgba(' + r + ',' + g + ',' + b + ',' + opacity / 100 + ')';
 }
 
