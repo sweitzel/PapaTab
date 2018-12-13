@@ -104,7 +104,7 @@ class PopupSidebar {
 
     // apply Sortable.js to sidebar topics
     let options = {
-      handle: '.fa-bars',
+      handle: '.drag-handle',
       onUpdate: (evt) => {
         if (evt.from === evt.to) {
           console.debug("Moved Topic %s (id=%s) from %d to %d", evt.item.innerText, evt.item.id, evt.oldIndex, evt.newIndex);
@@ -908,15 +908,16 @@ class Topic {
     }
 
     // color-icon
-    this.icon = document.createElement('i');
-    this.icon.title = 'Drag to reorder topics';
-    this.icon.classList.add('w3-bar-item', 'w3-image', 'w3-xxlarge', 'fa', 'fa-bars', 'drag-handle');
-    this.icon.style.color = this.color;
-    this.icon.style.verticalAlign = 'middle';
+    this.icon = document.createElement('img');
+    this.icon.classList.add('w3-bar-item', 'w3-image', 'w3-circle', 'drag-handle');
+    let favLink = createFavicon(this.name, this.color)
+    if (favLink) {
+      this.icon.setAttribute('src', favLink.href);
+    }
     this.icon.style.filter = 'opacity(20%)';
     this.icon.style.padding = 'unset';
     this.icon.style.marginLeft = '5px';
-    this.icon.style.height = '40px';
+    this.icon.style.height = '36px';
 
     // topic div
     this.divTopic = document.createElement('div');
@@ -1044,8 +1045,11 @@ class Topic {
   updateInfo() {
     // update topic name
     this.divTopicTitle.innerText = this.name;
-    // update topic color
-    this.icon.style.color = this.color;
+    // update Icon
+    let favLink = createFavicon(this.name, this.color)
+    if (favLink) {
+      this.icon.setAttribute('src', favLink.href);
+    }
     // update tab related info
     if (this.tabs) {
       console.debug("Topic(%d).updateInfo() %O", this.id, this.tabs);
@@ -1191,6 +1195,7 @@ class BrowsingWindow {
     this.title = "Default Name";
     // li element in sidebar
     this.li = "";
+    this.icon = {};
 
     // bind this
     this.add = this.add.bind(this);
@@ -1209,15 +1214,16 @@ class BrowsingWindow {
     this.li.setAttribute("id", "window-" + this.id);
 
     // color-icon
-    let icon = document.createElement('i');
-    icon.classList.add('w3-bar-item', 'w3-left', 'w3-xxlarge', 'w3-image', 'fa', 'fa-bars');
-    icon.style.filter = 'opacity(20%)';
-    icon.style.verticalAlign = 'middle';
-    icon.style.filter = 'opacity(20%)';
-    icon.style.padding = 'unset';
-    icon.style.marginLeft = '5px';
-    icon.style.marginRight = '8px';
-    icon.style.height = '40px';
+    this.icon = document.createElement('img');
+    this.icon.classList.add('w3-bar-item', 'w3-image', 'w3-circle', 'drag-handle');
+    let favLink = createFavicon('W', '#ccc')
+    if (favLink) {
+      this.icon.setAttribute('src', favLink.href);
+    }
+    this.icon.style.filter = 'opacity(20%)';
+    this.icon.style.padding = 'unset';
+    this.icon.style.marginLeft = '5px';
+    this.icon.style.height = '36px';
 
     // link
     let divWindow = document.createElement('div');
@@ -1232,10 +1238,10 @@ class BrowsingWindow {
 
     //add event listener for each tab link
     this.li.onmouseenter = () => {
-      icon.style.filter = 'opacity(100%)';
+      this.icon.style.filter = 'opacity(100%)';
     };
     this.li.onmouseleave = () => {
-      icon.style.filter = 'opacity(20%)';
+      this.icon.style.filter = 'opacity(20%)';
     };
 
     // activate the window
@@ -1249,7 +1255,7 @@ class BrowsingWindow {
         .catch(err => console.error("BrowsingWindow activate failed: %s", err));
     };
 
-    this.li.appendChild(icon);
+    this.li.appendChild(this.icon);
     this.li.appendChild(divWindow);
     ul.appendChild(this.li);
   }

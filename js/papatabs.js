@@ -239,8 +239,6 @@ function timeDifference(previous) {
   let lang = navigator.languages ? navigator.languages[0] : navigator.language;
   let rtf = new Intl.RelativeTimeFormat(lang);
 
-  console.log('xxx lang=%O, rtf=%O, %s = %s - %s', lang, rtf, elapsed, current, previous);
-
   if (elapsed < msPerMinute) {
     return rtf.format(-Math.round(elapsed/1000), 'second');
   }

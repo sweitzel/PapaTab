@@ -158,6 +158,9 @@ li.pinned:after {
 .statusSelected i {
   filter: opacity(1.0) !important;
 }
+.statusSelected img {
+  filter: opacity(1.0) !important;
+}
 
 /*region Main view color chooser */
 .colorChooser {
