@@ -29,11 +29,16 @@
   <button id="butSidebarMenu" class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey">
     <i class="fa fa-bars"></i>Menu
   </button>
+  <div class="searchBar">
+    <i class="w3-small fas fa-search"></i>
+    <input/>
+  </div>
   <span class="w3-bar-item w3-right" data-localize="__MSG_ExtensionName__">PapaTab</span>
 </div>
 
 <!-- PopupSidebar/menu -->
-<div id="divSidebar" class="w3-sidebar w3-collapse w3-theme-dark w3-animate-left" style="z-index:3;width:300px;height:96%;overflow-x:hidden;">
+<div id="divSidebar" class="w3-sidebar w3-collapse w3-theme-dark w3-animate-left"
+     style="z-index:3;width:300px;height:96%;overflow-x:hidden;">
   <nav id="navSidebar">
     <div>
       <div class="w3-border-bottom w3-large w3-margin-bottom tooltip">
@@ -48,14 +53,13 @@
         <span class="w3-theme-dark tooltiptext" data-localize="__MSG_AddNewWindow__">Add a new Window</span>
       </div>
       <ul id="ulSidebarWindows"></ul>
-      <div class="w3-bar-item w3-bottom w3-center">
-        <i class="w3-xlarge fa fa-toggle-off"> Light Theme</i>
-      </div>
     </div>
   </nav>
-  <div id="divRecycle" class="w3-display-bottommiddle w3-margin-bottom w3-button w3-hover-text-deep-orange">
-    <i id="butRecycle" class="my-zoom-hover fa fa-trash-alt w3-xlarge w3-padding"></i>Move to Recycle Bin
+  <!--
+  <div id="divRecycle" class="w3-button w3-margin-top w3-hover-text-deep-orange" style="width:300px">
+    <i id="butRecycle" class="w3-left my-zoom-hover fa fa-trash-alt w3-xlarge"></i>
   </div>
+  -->
 </div>
 
 <!-- Overlay effect when opening sidebar on small screens -->
@@ -65,8 +69,8 @@
 <!-- !PAGE CONTENT! -->
 <div class="w3-main" style="margin-left:300px;margin-top:43px;">
   <!-- Header -->
-  <header id="hMainHeader" class="w3-container mainHeader"/>
-  <h4>Current Window</h4>
+  <header id="hMainHeader" class="w3-container mainHeader">
+    <h4>Current Window</h4>
   </header>
 
   <div id="divMain" class="w3-container w3-margin">

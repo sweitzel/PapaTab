@@ -68,6 +68,12 @@ ul {
 .tooltip#tipSaveAsTopic:hover + .tooltiptext {
   visibility: visible;
 }
+.tooltip#tipTopicToTrash:hover + .tooltiptext {
+  visibility: visible;
+}
+.tooltip#tipTopicColor:hover + .tooltiptext {
+  visibility: visible;
+}
 /* input validation */
 input:invalid {
   animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
@@ -178,4 +184,22 @@ li.pinned:after {
   display: flex;
   flex-wrap: wrap;
   width: 100%;
+}
+
+/* Search bar */
+.searchBar {
+  border-radius: 8px;
+  position: absolute;
+  left: 310px;
+  top: 5px;
+}
+.searchBar i {
+
+}
+.searchBar input {
+  border: none;
+  width: 240px;
+  color: white;
+  border-radius: 8px;
+  background-color: rgba(255,255,255,0.05);
 }

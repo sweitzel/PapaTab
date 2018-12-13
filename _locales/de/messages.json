@@ -27,9 +27,17 @@
     "message": "Gemerkte Tabs",
     "description": "Main: Saved/Favorite Tabs"
   },
-  "SaveAsTopic": {
+  "tipSaveAsTopic": {
     "message": "Als Thema speichern",
     "description": "Main: Save/Convert Window as Topic"
+  },
+  "tipChangeTopicColor": {
+    "message": "Farbe ändern",
+    "description": "Main: Change topic color"
+  },
+  "tipMoveTopicToTrash": {
+    "message": "Thema in Papierkorb verschieben",
+    "description": "Main: Move topic to trash"
   },
   "modalAddTopic1": {
     "message": "Neues Thema anlegen",
@@ -70,6 +78,10 @@
   "UnsaveTab": {
     "message": "Vergessen",
     "description": "General: Unsave a tab"
+  },
+  "Created": {
+    "message": "Erstellt",
+    "description": "General: Created"
   },
   "topicAddFailed": {
     "message": "Thema kann nicht gespeichert werden, bitte korrigieren sie den Namen.",

@@ -80,7 +80,7 @@ var papaTabs = (function () {
       console.log(`window.onCreated listener fired:` + JSON.stringify(window));
     }
     // send event to inform all instances about the new Window and update their sidebar
-    chrome.runtime.sendMessage({
+    browser.runtime.sendMessage({
       action: 'WindowCreated',
       detail: {window: window}
     });

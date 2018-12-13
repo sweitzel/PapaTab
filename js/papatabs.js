@@ -40,7 +40,7 @@ function dbInit() {
   //import Dexie from 'dexie';
   debe = new Dexie('PapaTabs');
   // id:        - topic id
-  // created    - topic creation time
+  // createdTime - topic creation time
   // lastAccess - last access time
   // name       - name of the topic (unique index)
   // color      - color of the topic (not indexed)
@@ -168,6 +168,16 @@ function measureText(context, text, fontface, min, max, desiredWidth) {
   return parseInt(found);
 }
 
+// determine good contrast color (black or white) for given BG color
+function getContrastYIQ(hexcolor){
+  const r = parseInt(hexcolor.substr(0,2),16);
+  const g = parseInt(hexcolor.substr(2,2),16);
+  const b = parseInt(hexcolor.substr(4,2),16);
+  // http://www.w3.org/TR/AERT#color-contrast
+  let yiq = ((r*299)+(g*587)+(b*114))/1000;
+  return (yiq >= 128) ? 'black' : 'white';
+}
+
 /* generate favicon based on title and color */
 function createFavicon(title, color) {
   if (typeof color !== 'string' || !color.startsWith('#')) {
@@ -181,14 +191,14 @@ function createFavicon(title, color) {
   ctx.fillStyle = color;
   ctx.fillRect(0, 0, 63, 63);
   // text color
-  ctx.fillStyle = invertColor(color);
+  ctx.fillStyle = getContrastYIQ(color);
 
   let acronym = title.split(' ').map(function(item) {
     return item[0]
   }).join('').substr(0, 2);
 
-  let fontSize = measureText(ctx, acronym, 'Georgia', 0, 80, 60);
-  ctx.font = `bold ${fontSize}px "Georgia"`;
+  let fontSize = measureText(ctx, acronym, 'Arial', 0, 80, 60);
+  ctx.font = `bold ${fontSize}px "Arial"`;
   ctx.textAlign='center';
   ctx.textBaseline="middle";
   ctx.fillText(acronym, 32, 38);
@@ -204,4 +214,52 @@ function createFavicon(title, color) {
 }
 
 //endregion
-/* Favicon handling */
+
+function hex2rgba(hex, opacity){
+  // https://stackoverflow.com/questions/21646738/convert-hex-to-rgba
+  hex = hex.replace('#','');
+  r = parseInt(hex.substring(0, hex.length/3), 16);
+  g = parseInt(hex.substring(hex.length/3, 2*hex.length/3), 16);
+  b = parseInt(hex.substring(2*hex.length/3, 3*hex.length/3), 16);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + opacity / 100 + ')';
+}
+
+// calculate relative human readable distance for given timestamp
+function timeDifference(previous) {
+  let current = Date.now();
+  const msPerMinute = 60 * 1000;
+  const msPerHour = msPerMinute * 60;
+  const msPerDay = msPerHour * 24;
+  const msPerWeek = msPerDay * 7;
+  const msPerMonth = msPerDay * 30;
+  const msPerYear = msPerDay * 365;
+
+  const elapsed = Math.round((current - previous));
+
+  let lang = navigator.languages ? navigator.languages[0] : navigator.language;
+  let rtf = new Intl.RelativeTimeFormat(lang);
+
+  console.log('xxx lang=%O, rtf=%O, %s = %s - %s', lang, rtf, elapsed, current, previous);
+
+  if (elapsed < msPerMinute) {
+    return rtf.format(-Math.round(elapsed/1000), 'second');
+  }
+  else if (elapsed < msPerHour) {
+    return rtf.format(-Math.round(elapsed/msPerMinute), 'minute');
+  }
+  else if (elapsed < msPerDay ) {
+    return rtf.format(-Math.round(elapsed/msPerHour), 'hour');
+  }
+  else if (elapsed < msPerWeek) {
+    return rtf.format(-Math.round(elapsed/msPerDay), 'day');
+  }
+  else if (elapsed < msPerMonth) {
+    return rtf.format(-Math.round(elapsed/msPerWeek), 'week');
+  }
+  else if (elapsed < msPerYear) {
+    return rtf.format(-Math.round(elapsed/msPerMonth), 'month');
+  }
+  else {
+    return rtf.format(-Math.round(elapsed/msPerYear), 'year');
+  }
+}

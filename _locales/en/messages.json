@@ -27,9 +27,17 @@
     "message": "Favorite Tabs",
     "description": "Main: Saved/Favorite Tabs"
   },
-  "SaveAsTopic": {
+  "tipSaveAsTopic": {
     "message": "Save as Topic",
     "description": "Main: Save/Convert Window as Topic"
+  },
+  "tipChangeTopicColor": {
+    "message": "Change topic color",
+    "description": "Main: Change topic color"
+  },
+  "tipMoveTopicToTrash": {
+    "message": "Move Topic to trash",
+    "description": "Main: Move topic to trash"
   },
   "modalCreateNewTopic": {
     "message": "Create a new Topic",
@@ -74,6 +82,10 @@
   "Unpin": {
     "message": "Unpin",
     "description": "General: Unpin a tab"
+  },
+  "Created": {
+    "message": "Created",
+    "description": "General: Created"
   },
   "topicAddFailed": {
     "message": "Unable to store Topic. Please check the name and try again.",

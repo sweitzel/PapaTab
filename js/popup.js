@@ -139,11 +139,17 @@ class PopupSidebar {
 
   // add one (existing or new) topic to the topic list
   addTopic(item) {
+    if ('deleted' in item) {
+      console.debug("Sidebar.addTopic() skipped for deleted topic: %O", item);
+      return undefined;
+    }
     console.debug("Sidebar.addTopic(): Adding topic=%O", item);
+    /*
     // check if Topic was a BrowsingWindow - then remove it
     if (item.windowId) {
       this.removeWindow(item.windowId);
     }
+    */
     let newTopic = new Topic({
       pt: this.pt,
       id: item.id,
@@ -437,7 +443,7 @@ class PopupMain {
       document.getElementById('divMainSavedTabs').classList.add('w3-hide');
       return;
     } else {
-      if (this.pt.whoIAm.currentTopic.favorites) {
+      if (this.pt.whoIAm.currentTopic.favorites && this.pt.whoIAm.currentTopic.favorites.length > 0) {
         while (this.nodes.ulSavedTabs.firstChild) {
           this.nodes.ulSavedTabs.removeChild(this.nodes.ulSavedTabs.firstChild);
         }
@@ -445,16 +451,18 @@ class PopupMain {
         for (let savedTab of this.pt.whoIAm.currentTopic.favorites) {
           this.addFavoriteTab(savedTab);
         }
+      } else {
+        document.getElementById('divMainSavedTabs').classList.add('w3-hide');
       }
     }
   }
 
   // draw options for current Topic
   drawTopicOptions() {
+    this.nodes.divOptions.innerHTML = "";
     if (!this.pt.whoIAm || !this.pt.whoIAm.currentTopic) {
       // its a regular Window
       // add button to convert to Topic
-
       let divConvert = document.createElement('div');
       divConvert.classList.add('w3-display-topright', 'w3-xlarge', 'far', 'fa-save', 'tooltip', 'my-zoom-hover');
       divConvert.id = 'tipSaveAsTopic';
@@ -462,7 +470,7 @@ class PopupMain {
       divConvert.style.position = 'absolute';
       let spanConvertHelp = document.createElement('span');
       spanConvertHelp.classList.add('tooltiptext');
-      spanConvertHelp.innerText = getTranslationFor("SaveAsTopic");
+      spanConvertHelp.innerText = getTranslationFor("tipSaveAsTopic");
       spanConvertHelp.style.top = '82px';
       spanConvertHelp.style.right = '35px';
 
@@ -472,9 +480,9 @@ class PopupMain {
         let browsingWindow = this.pt.refSidebar.windows.find(win => win.id === this.pt.whoIAm.currentWindow.id);
         if (browsingWindow) {
           // call convert
-          browsingWindow.saveAsTopic();
+          browsingWindow.saveAsTopic().then().catch(err => console.warn('PopupMain converting window to topic failed: %O', err));
         } else {
-          console.warn("Cannot convert Window to Topic, window not find in %O (current=%O)", this.pt.refSidebar.windows, this.pt.whoIAm.currentWindow)
+          console.warn("Cannot convert Window to Topic, window not found in %O (current=%O)", this.pt.refSidebar.windows, this.pt.whoIAm.currentWindow)
         }
       });
 
@@ -500,18 +508,48 @@ class PopupMain {
     inputName.style.background = 'unset';
     inputName.style.color = '36px';
 
+    let spanCreateTime = document.createElement('span');
+    spanCreateTime.classList.add('w3-small', 'w3-opacity-min');
+    spanCreateTime.innerText = getTranslationFor('Created') + ' ' + timeDifference(this.pt.whoIAm.currentTopic.createdTime);
+    spanCreateTime.style.userSelect = 'none';
+    spanCreateTime.style.right = '35px';
+    spanCreateTime.style.top = '97%';
+    spanCreateTime.style.position = 'absolute';
+
+    let divOptionsRight = document.createElement('div');
+    divOptionsRight.classList.add('w3-right');
+
+    // Trash
+    let iTrash = document.createElement('i');
+    iTrash.classList.add('w3-xlarge', 'w3-padding-24', 'w3-margin-right', 'fa', 'fa-trash-alt', 'my-zoom-hover', 'tooltip')
+    iTrash.id = 'tipTopicToTrash';
+    let spanTrashTip = document.createElement('span');
+    spanTrashTip.classList.add('tooltiptext');
+    spanTrashTip.style.right = '80px';
+    spanTrashTip.style.top = '120px';
+    spanTrashTip.innerText = getTranslationFor('tipMoveTopicToTrash', 'Move Topic to Trash');
+
+    divOptionsRight.appendChild(iTrash);
+    divOptionsRight.appendChild(spanTrashTip);
+
     // Color
     let inputColor = document.createElement('input');
-    inputColor.classList.add('w3-border', 'w3-right', 'w3-margin', 'my-zoom-hover', 'colorChooser');
+    inputColor.id = 'tipTopicColor';
+    inputColor.classList.add('w3-border', 'w3-right', 'w3-margin', 'my-zoom-hover', 'colorChooser', 'tooltip');
     inputColor.name = 'Topic Color';
     inputColor.type = 'color';
     inputColor.value = this.pt.whoIAm.currentTopic.color;
     inputColor.style.height = '42px';
     inputColor.style.width = '42px';
     inputColor.style.cursor = 'pointer';
-    //inputColor.style.border = 'unset';
-    //inputColor.style.padding = 'unset';
-    //inputColor.style.marginRight = '10px';
+    let spanColorTip = document.createElement('span');
+    spanColorTip.classList.add('tooltiptext');
+    spanColorTip.style.right = '25px';
+    spanColorTip.style.top = '120px';
+    spanColorTip.innerText = getTranslationFor('tipChangeTopicColor', 'Change topic color');
+
+    divOptionsRight.appendChild(inputColor);
+    divOptionsRight.appendChild(spanColorTip);
 
     inputName.addEventListener('focusout', () => {
       // save new name to DB
@@ -568,7 +606,7 @@ class PopupMain {
           browser.runtime.sendMessage({
             action: 'TopicInfoUpdated',
             detail: {topicId: this.pt.whoIAm.currentTopic.id, name: inputName.value, color: inputColor.value}
-          });
+          }).then().catch(err => console.warn('Unable to send browser message: %O', err));
         })
         .catch(err => {
           console.warn("Topic Color update failed: %s", err);
@@ -577,9 +615,21 @@ class PopupMain {
         });
     });
 
+    iTrash.addEventListener('click', (e) => {
+      e.preventDefault();
+      // find Topic instance, then call delete on it
+      let topic = this.pt.refSidebar.topics.find(topic => topic.id === this.pt.whoIAm.currentTopic.id);
+      if (topic) {
+        topic.moveToTrash();
+      } else {
+        console.warn("Cannot delete Topic, Topic not found in %O (current=%O)", this.pt.refSidebar.topics, this.pt.whoIAm.currentTopic)
+      }
+    });
 
     this.nodes.divOptions.appendChild(inputName);
-    this.nodes.divOptions.appendChild(inputColor);
+    this.nodes.divOptions.appendChild(spanCreateTime);
+
+    this.nodes.divOptions.appendChild(divOptionsRight);
 
     // delete button
   }
@@ -701,6 +751,9 @@ class PopupMain {
   // add a favorite tab to the list (it has already been saved to DB)
   addFavoriteTab(savedTab) {
     console.debug("PopupMain.addFavoriteTab(): Adding a saved tab - %O", savedTab);
+    if (document.getElementById('divMainSavedTabs').classList.contains('w3-hide')) {
+      document.getElementById('divMainSavedTabs').classList.remove('w3-hide');
+    }
     let newSavedTab = new FavoriteTab(this.pt, savedTab);
     newSavedTab.add(this.nodes.ulSavedTabs);
     this.favorites.push(newSavedTab);
@@ -715,6 +768,9 @@ class PopupMain {
       removeTab.remove(this.nodes.ulSavedTabs);
       // and update the FavoriteTab array
       this.favorites = this.favorites.filter(tab => tab.url !== savedTab.url);
+    }
+    if (this.favorites.length === 0) {
+      document.getElementById('divMainSavedTabs').classList.add('w3-hide');
     }
   }
 
@@ -830,8 +886,8 @@ class Topic {
     // bind this
     this.add = this.add.bind(this);
     this.addToDb = this.addToDb.bind(this);
-    this.removeFromDb = this.removeFromDb.bind(this);
     this.load = this.load.bind(this);
+    this.moveToTrash = this.moveToTrash.bind(this);
 
     this.setOpen = this.setOpen.bind(this);
     this.setClosed = this.setClosed.bind(this);
@@ -924,8 +980,7 @@ class Topic {
 
   // add Topic to DB
   async addToDb() {
-    let dbId = await dbAddTopic(this.name, this.color);
-    this.id = dbId;
+    this.id = await dbAddTopic(this.name, this.color);
     // inform local Sidebar about new topic
     this.pt.refSidebar.addTopic({
       id: this.id,
@@ -1020,25 +1075,6 @@ class Topic {
     }
   }
 
-  // removes a topic DB (and list)
-  async removeFromDb(ul) {
-    if (typeof this.id === 'undefined') {
-      console.warn("Topic.removeFromDb called but id unknown!");
-      return false;
-    }
-    await dbRemoveTopic(this.id);
-    this.remove(ul);
-    // inform local Sidebar about deleted topic
-    this.pt.removeTopic(this);
-    // Send global RemoveTopic event, so all other Sidebar instances can get it
-    chrome.runtime.sendMessage({
-      action: 'TopicRemove',
-      detail: {id: this.id, name: this.name}
-    });
-    return true;
-  }
-
-
   /*
    * Called when any tab is opened, closed or changed
    *   if the tab belongs to a Topic window - the tabs will be saved to the Topics DB
@@ -1101,6 +1137,33 @@ class Topic {
         detail: {id: this.id, windowId: newWindow.id}
       });
     }
+  }
+
+  /*
+   * Move Topic To Trash
+   */
+  async moveToTrash() {
+    console.debug("Topic.moveToTrash() called for topicId=%d", this.id);
+
+    // update Topic deleted field in DB
+    await dbUpdateTopic(this.id, {deleted: Date.now()});
+
+    this.pt.refSidebar.removeTopic({id: this.id});
+
+    // inform other instances about created Topic
+    browser.runtime.sendMessage({
+      action: 'TopicRemove',
+      detail: {id: this.id}
+    });
+    // inform other instances about Window to add (replacing the topic)
+    let win = await browser.windows.get(this.windowId);
+    browser.runtime.sendMessage({
+      action: 'WindowCreated',
+      detail: {window: win}
+    });
+
+    // reload this instance for easiness sake
+    await browser.tabs.reload();
   }
 
   // convert HTML element id to TopicId, e.g. "topic-1" -> 1
@@ -1269,6 +1332,12 @@ class BrowsingWindow {
       action: 'TopicAdd',
       detail: info
     });
+    // inform other instances about removed window (its now a topic)
+    browser.runtime.sendMessage({
+      action: 'WindowRemoved',
+      detail: {windowId: info.id}
+    });
+
 
     // reload this instance
     await browser.tabs.reload();
@@ -1972,10 +2041,6 @@ class FavoriteTab {
 
   let pt = {};
 
-  function getBrowserLanguage() {
-    return navigator.languages ? navigator.languages[0] : navigator.language;
-  }
-
   function replace_i18n(obj, tag) {
     let msg = tag.replace(/__MSG_(\w+)__/g, function (match, v1) {
       return v1 ? chrome.i18n.getMessage(v1) : '';
@@ -2032,7 +2097,12 @@ class FavoriteTab {
 
     // first determine simply which window currently running on
     ret.currentWindow = await browser.windows.getCurrent({populate: true});
-    ret.currentTopic = await dbGetTopicBy('windowId', ret.currentWindow.id).first();
+    let topic = await dbGetTopicBy('windowId', ret.currentWindow.id).first();
+    if (topic && 'deleted' in topic) {
+      console.debug("detectWhoIAm() - ignore deleted topic %O", topic);
+    } else {
+      ret.currentTopic = topic;
+    }
     console.debug("detectWhoIAm(): windowId=%d, Topic=%O", ret.currentWindow.id, ret.currentTopic);
     return ret;
   }
