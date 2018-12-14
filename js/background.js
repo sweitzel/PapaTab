@@ -16,156 +16,100 @@ var papaTabs = (function () {
   //browser.tabs.onCreated.addListener()
 
   //add listeners for session monitoring
-  chrome.tabs.onCreated.addListener(function (tab) {
+  browser.tabs.onCreated.addListener(function (tab) {
     if (debug) {
-      console.log('tab.onCreated listener fired: %O', tab);
+      console.debug('tab.onCreated listener fired: %O', tab);
     }
     // send event to inform all instances about the created Tab and update their sidebar / main view if needed
-    chrome.runtime.sendMessage({
-      action: 'TabCreated',
-      detail: {tab: tab}
-    });
+    sendRuntimeMessage('TabCreated', {tab: tab});
   });
 
-  chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
+  browser.tabs.onRemoved.addListener(function (tabId, removeInfo) {
     if (debug) {
-      console.log(`tab(${tabId}).onRemoved listener fired:` + JSON.stringify(removeInfo));
+      console.debug('tab(%d).onRemoved listener fired: %s', tabId, JSON.stringify(removeInfo));
     }
     // window closing, no need to update anybody (todo check if this is true)
     if (removeInfo.isWindowClosing === false) {
       // send event to inform all instances about the removed Tab and update their sidebar / main view if needed
-      chrome.runtime.sendMessage({
-        action: 'TabRemoved',
-        detail: {tabId: tabId, removeInfo: removeInfo}
-      });
+      sendRuntimeMessage('TabRemoved', {tabId: tabId, removeInfo: removeInfo});
     }
   });
 
-  chrome.tabs.onMoved.addListener(function (tabId, moveInfo) {
+  browser.tabs.onMoved.addListener(function (tabId, moveInfo) {
     if (debug) {
-      console.log(`tab(${tabId}).onMoved listener fired:` + JSON.stringify(moveInfo));
+      console.debug('tab(%d).onMoved listener fired: %s', tabId, JSON.stringify(moveInfo));
     }
     // send event to inform all instances about the moved Tab and update their main view if needed
-    chrome.runtime.sendMessage({
-      action: 'TabMoved',
-      detail: {tabId: tabId, moveInfo: moveInfo}
-    });
+    sendRuntimeMessage('TabMoved', {tabId: tabId, moveInfo: moveInfo});
   });
 
-  chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+  browser.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     if (debug) {
-      console.log(`tab(${tabId}).onUpdated listener fired:` + JSON.stringify(changeInfo));
+      console.debug('tab(%d).onUpdated listener fired: %s', tabId, JSON.stringify(changeInfo));
     }
     // URL changed?
     // send event to inform all instances about the updated Tab and update their sidebar / main view if needed
-    chrome.runtime.sendMessage({
-      action: 'TabUpdated',
-      detail: {tabId: tabId, changeInfo: changeInfo, tab: tab}
-    });
+    sendRuntimeMessage('TabUpdated', {tabId: tabId, changeInfo: changeInfo, tab: tab});
   });
 
-  chrome.windows.onRemoved.addListener(function (windowId) {
+  browser.windows.onRemoved.addListener(function (windowId) {
     if (debug) {
-      console.log(`window(${windowId}).onRemoved listener fired.`);
+      console.debug('window(%d).onRemoved listener fired.', windowId);
     }
     // send event to inform all instances about the removed Window and update their sidebar
-    chrome.runtime.sendMessage({
-      action: 'WindowRemoved',
-      detail: {windowId: windowId}
-    });
+    sendRuntimeMessage('WindowRemoved', {windowId: windowId});
   });
 
-  chrome.windows.onCreated.addListener(function (window) {
+  browser.windows.onCreated.addListener((window) => {
     if (debug) {
-      console.log(`window.onCreated listener fired:` + JSON.stringify(window));
+      console.debug('window.onCreated listener fired: %O', window);
     }
-    // send event to inform all instances about the new Window and update their sidebar
-    browser.runtime.sendMessage({
-      action: 'WindowCreated',
-      detail: {window: window}
-    });
+    // auto-load Papatab popup (no problem if already open)
+    openPapaTab({windowId: window.id}).then(() => {
+      // send event to inform all instances about the new Window and update their sidebar
+      sendRuntimeMessage('WindowCreated', {window: window});
+    }).catch(err => console.error('window created - openPapaTab failed: %O', err));
   });
 
   //add listeners for tab and window focus changes
   //when a tab or window is changed, close the move tab popup if it is open
-  chrome.windows.onFocusChanged.addListener(function (windowId) {
+  browser.windows.onFocusChanged.addListener(function (windowId) {
     if (debug) {
-      console.log(`window(${windowId}).onFocusChanged listener fired`);
+      console.debug('window(%d).onFocusChanged listener fired', windowId);
     }
     // Prevent a click in the popup on Ubuntu or ChromeOS from closing the
     // popup prematurely.
-    if (windowId === chrome.windows.WINDOW_ID_NONE) {
+    if (windowId === browser.windows.WINDOW_ID_NONE) {
       return;
     }
   });
 
   //add listeners for message requests from other extension pages (popup.html)
-  chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  browser.runtime.onMessage.addListener((request, sender) => {
     if (debug) {
-      console.log('onMessage listener fired: request=%O, sender=%O, sendResponse=%O', request, sender, sendResponse);
+      console.debug('onMessage listener fired: request=%O, sender=%O', request, sender);
     }
-    let topicId, windowId, tabId;
-
     // endpoints called by popup.js
     switch (request.action) {
-      case 'loadSession':
-        topicId = request.topicId;
-        if (topicId) {
-          handleLoadTopic(topicId);
-          sendResponse(true);
-        }
-        return true;
-        break;
-      case 'loadWindow':
-        windowId = request.windowId;
-        if (windowId) {
-          handleLoadWindow(windowId);
-          sendResponse(true);
-        }
-        return true;
-        break;
-      case 'loadTabInSession':
-        topicId = request.topicId;
-        if (topicId && request.tabUrl) {
-          handleLoadTopic(topicId, request.tabUrl);
-          sendResponse(true);
-        }
-        return true;
-        break;
-      case 'loadTabInWindow':
-        console.log("loadTabInWindow() request=%O", request);
-        windowId = request.windowId;
-        if (windowId && request.tabUrl) {
-          handleLoadWindow(windowId, request.tabUrl);
-          sendResponse(true);
-        }
-        return true;
-        break;
       case 'CreateWindow':
         // CreateWindow - handle in background.js
-        console.log("CreateWindow() request=%O", request);
-        handleCreateWindow()
-          .then(newWindowId => sendResponse(newWindowId))
-          .catch(err => console.error("handleCreateWindow() error: %s", err));
-        return true;
-        break;
-      default:
-        return false;
+        console.debug("CreateWindow() request=%O", request);
+        // return promise
+        return handleCreateWindow();
     }
   });
 
   //runtime extension install listener
-  chrome.runtime.onInstalled.addListener(function (details) {
+  browser.runtime.onInstalled.addListener(function (details) {
     if (details.reason === "install") {
-      console.log("This is a first install!");
+      console.debug("This is a first install!");
       if (debug) {
-        console.log('Extension fresh installed!');
-        debugger;
+        console.info('Extension freshly installed!');
       }
     } else if (details.reason === "update") {
-      let thisVersion = chrome.runtime.getManifest().version;
+      let thisVersion = browser.runtime.getManifest().version;
       if (details.previousVersion !== thisVersion) {
-        console.log(`Updated from ${details.previousVersion} to ${thisVersion}!`);
+        console.info('Updated from version %s to %s!', details.previousVersion, thisVersion);
       }
     }
   });
@@ -186,11 +130,22 @@ var papaTabs = (function () {
 
 }()); // end papaTabs
 
+function sendRuntimeMessage(action, detail, thenAction) {
+  if (browser.runtime.onMessage.hasListeners()) {
+    browser.runtime.sendMessage({
+      action: action,
+      detail: detail
+    }).then(thenAction)
+    // todo: check how to prevent this: Could not establish connection. Receiving end does not exist. (happens if popup not open)
+      .catch(err => console.info('%s sendMessage problem: %s', action, err.message));
+  }
+}
+
 async function openPapaTab(param) {
   // query tab for specified or current window with extension URL
   let tabs = await browser.tabs.query({
-    windowId: (param && 'windowId' in param) ? param.windowId : chrome.windows.WINDOW_ID_CURRENT,
-    url: chrome.extension.getURL('popup.html')
+    windowId: (param && 'windowId' in param) ? param.windowId : browser.windows.WINDOW_ID_CURRENT,
+    url: browser.extension.getURL('popup.html')
   });
   for (let i = 0; i < tabs.length; i++) {
     if (i > 0) {
@@ -203,8 +158,8 @@ async function openPapaTab(param) {
   }
   if (tabs.length === 0) {
     await browser.tabs.create({
-      url: chrome.extension.getURL('popup.html'),
-      windowId: (param && 'windowId' in param) ? param.windowId : chrome.windows.WINDOW_ID_CURRENT,
+      url: browser.extension.getURL('popup.html'),
+      windowId: (param && 'windowId' in param) ? param.windowId : browser.windows.WINDOW_ID_CURRENT,
       pinned: true
     });
   }
@@ -214,4 +169,4 @@ async function openPapaTab(param) {
  * Activate or Open Papatab when extension action is clicked
  *   this calls the openPapaTab with tabs.tab as parameter
  */
-chrome.browserAction.onClicked.addListener(openPapaTab);
+browser.browserAction.onClicked.addListener(openPapaTab);

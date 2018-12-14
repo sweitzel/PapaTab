@@ -110,7 +110,7 @@ class PopupSidebar {
           console.debug("Moved Topic %s (id=%s) from %d to %d", evt.item.innerText, evt.item.id, evt.oldIndex, evt.newIndex);
           this.saveTopicOrderToDb().then(() => {
             // Send global MoveTopic event, so all other Sidebar instances can get it
-            chrome.runtime.sendMessage({
+            browser.runtime.sendMessage({
               action: 'TopicMove',
               detail: {id: evt.item.id, from: evt.oldIndex, to: evt.newIndex}
             });
@@ -271,32 +271,32 @@ class PopupSidebar {
       this.removeTopic(params.detail);
     });
     // listen to global 'AddTopic' (received from other chrome window)
-    browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    browser.runtime.onMessage.addListener((request, sender) => {
       // endpoints called by popup.js
       let topic;
       switch (request.action) {
         case 'TopicAdd':
-          console.debug("Chrome AddTopic event received: detail=%O", request.detail);
+          console.debug("Custom AddTopic event received: detail=%O", request.detail);
           this.addTopic(request.detail);
-          return true;
+          break;
         case 'TopicRemove':
-          console.debug("Chrome TopicRemove event received: detail=%O", request.detail);
+          console.debug("Custom TopicRemove event received: detail=%O", request.detail);
           this.removeTopic(request.detail);
-          return true;
+          break;
         case 'TopicMove':
-          console.debug("Chrome TopicMove event received: detail=%O", request.detail);
+          console.debug("Custom TopicMove event received: detail=%O", request.detail);
           this.moveTopic(request.detail);
-          return true;
+          break;
         case 'TopicInfoUpdated':
-          console.debug("Custom TopicTabsUpdated event received: detail=%O", request.detail);
+          console.debug("PopupSidebar - Custom TopicInfoUpdated event received: detail=%O", request.detail);
           this.updateTopicInfo(request.detail);
-          return true;
+          break;
         case 'TopicLoaded':
-          console.debug("Chrome TopicLoaded event received: detail=%O", request.detail);
+          console.debug("Custom TopicLoaded event received: detail=%O", request.detail);
           // a WindowCreated event can happen before TopicLoaded is received, therefore first cleanup the window
           let win = this.windows.find(win => request.detail.windowId === win.id);
           if (win) {
-            console.debug("Chrome TopicLoaded event; removing (wrong) Sidebar Window");
+            console.debug("Browser event TopicLoaded event; removing (wrong) Sidebar Window");
             this.removeWindow(request.detail.windowId);
           }
           topic = this.topics.find(topic => request.detail.id === topic.id);
@@ -304,12 +304,12 @@ class PopupSidebar {
             topic.windowId = request.detail.windowId;
             topic.setOpen();
           }
-          return true;
+          break;
         case 'WindowCreated':
-          console.log("WindowCreated topics=%O", this.topics);
+          console.debug("Browser event WindowCreated received: detail=%O, topics=%O", request.detail, this.topics);
           if (this.windows.find(win => win.id === request.detail.window.id)) {
             // when a session is restored, the windows are open but WindowCreated is sent again
-            console.log("Ignored Chrome WindowCreated for existing window id (%d)", request.detail.window.id);
+            console.debug("Ignored WindowCreated event for existing window id (%d)", request.detail.window.id);
           }
           // if a Topic is loaded, WindowCreated will also be sent
           // Note: if WindowCreated happens before TopicLoaded, then windowId is unknown and this will not work here
@@ -317,10 +317,9 @@ class PopupSidebar {
             topic.setOpen();
           }
           else {
-            console.debug("Chrome WindowCreated received: detail=%O", request.detail);
             this.addWindow(request.detail.window);
           }
-          return true;
+          break;
         case 'WindowRemoved':
           console.debug("Chrome WindowRemoved received: detail=%O", request.detail);
           if (topic = this.getTopicForWindowId(request.detail.windowId)) {
@@ -329,11 +328,11 @@ class PopupSidebar {
           } else {
             this.removeWindow(request.detail.windowId);
           }
-          return true;
+          break;
         case 'UpdateWindowOrTopicInfo':
           console.debug("Chrome UpdateWindowOrTopicInfo received: detail=%O", request.detail);
           this.updateTopicOrWindowInfo(request.detail.windowId);
-          return true;
+          break;
       }
     });
     // when add topic button clicked, dispatch to modal
@@ -347,7 +346,8 @@ class PopupSidebar {
       // Send global CreateWindow event
       browser.runtime.sendMessage({
         action: 'CreateWindow'
-      }).then(retVal => console.debug("CreateWindow complete: %s", JSON.stringify(retVal)));
+      }).then(retVal => console.debug("CreateWindow complete: %s", JSON.stringify(retVal)))
+        .catch(err => console.warn("CreateWindow failed: %O", err));
     });
   }
 
@@ -562,7 +562,7 @@ class PopupMain {
           // inform other browser window instances about the updated tabs
           browser.runtime.sendMessage({
             action: 'TopicInfoUpdated',
-            detail: {topicId: this.pt.whoIAm.currentTopic.id, name: inputName.value, color: inputColor.value}
+            detail: {source: 'PopupMain.drawTopicOptions', topicId: this.pt.whoIAm.currentTopic.id, name: inputName.value, color: inputColor.value}
           });
           // reset input validation error
           inputName.setCustomValidity("");
@@ -598,7 +598,7 @@ class PopupMain {
           // inform other browser window instances about the updated tabs
           browser.runtime.sendMessage({
             action: 'TopicInfoUpdated',
-            detail: {topicId: this.pt.whoIAm.currentTopic.id, name: inputName.value, color: inputColor.value}
+            detail: {source: 'PopupMain.drawTopicOptions', topicId: this.pt.whoIAm.currentTopic.id, name: inputName.value, color: inputColor.value}
           }).then().catch(err => console.warn('Unable to send browser message: %O', err));
         })
         .catch(err => {
@@ -698,6 +698,7 @@ class PopupMain {
     let tab = this.tabs.find(tab => tab.id === tabId);
     if (tab) {
       tab.update(this.nodes.ulActiveTabs, newTab, changeInfo);
+      // TODO updateTab is called often (loading/complete status), optimization of DB saving should be considered)
       tab.saveTabsToDb();
     }
   }
@@ -783,61 +784,61 @@ class PopupMain {
   }
 
   registerEvents() {
-    // listen to global events (received from other chrome window or background script)
-    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    // listen to global events (received from other Browser window or background script)
+    browser.runtime.onMessage.addListener((request) => {
       // endpoints called by popup.js
       switch (request.action) {
         case 'TabCreated':
           if (this.pt.whoIAm.currentWindow.id === request.detail.tab.windowId) {
-            console.debug("Chrome TabCreated received: detail=%O", request.detail);
+            console.debug("Browser Event TabCreated received: detail=%O", request.detail);
             this.addTab(request.detail.tab);
             // update title (sidebar + main)
             this.pt.refSidebar.updateTopicOrWindowInfo(request.detail.tab.windowId);
-            chrome.runtime.sendMessage({
+            browser.runtime.sendMessage({
               action: 'UpdateWindowOrTopicInfo',
               detail: {windowId: request.detail.tab.windowId}
             });
           }
-          return true;
+          break;
         case 'TabRemoved':
           if (this.pt.whoIAm.currentWindow.id === request.detail.removeInfo.windowId) {
-            console.debug("Chrome TabRemoved received: detail=%O", request.detail);
+            console.debug("Browser Event TabRemoved received: detail=%O", request.detail);
             this.removeTab(request.detail.tabId);
             // update title (sidebar + main)
             this.pt.refSidebar.updateTopicOrWindowInfo(request.detail.removeInfo.windowId);
-            chrome.runtime.sendMessage({
+            browser.runtime.sendMessage({
               action: 'UpdateWindowOrTopicInfo',
               detail: {windowId: request.detail.removeInfo.windowId}
             });
           }
-          return true;
+          break;
         case 'TabMoved':
           if (this.pt.whoIAm.currentWindow.id === request.detail.moveInfo.windowId) {
-            console.debug("Chrome TabMoved received: detail=%O", request.detail);
+            console.debug("Browser Event TabMoved received: detail=%O", request.detail);
             this.moveTab(request.detail.tabId, request.detail.moveInfo);
             // update title of other windows (sidebar + main)
             this.pt.refSidebar.updateTopicOrWindowInfo(request.detail.moveInfo.windowId);
-            chrome.runtime.sendMessage({
+            browser.runtime.sendMessage({
               action: 'UpdateWindowOrTopicInfo',
               detail: {windowId: request.detail.moveInfo.windowId}
             });
           }
-          return true;
+          break;
         case 'TabUpdated':
           if (request.detail.tab && this.pt.whoIAm.currentWindow.id === request.detail.tab.windowId) {
-            console.debug("Chrome TabUpdated received: detail=%O", request.detail);
+            console.debug("Browser Event TabUpdated received: detail=%O", request.detail);
             this.updateTab(request.detail.tabId, request.detail.tab, request.detail.changeInfo);
             // changeInfo.status == Complete, URL/Title changed?
             if (request.detail.changeInfo && 'status' in request.detail.changeInfo && request.detail.changeInfo.status === 'complete') {
               // update title on other instances (sidebar + main)
               this.pt.refSidebar.updateTopicOrWindowInfo(request.detail.tab.windowId);
-              chrome.runtime.sendMessage({
+              browser.runtime.sendMessage({
                 action: 'UpdateWindowOrTopicInfo',
                 detail: {windowId: request.detail.tab.windowId}
               });
             }
           }
-          return true;
+          break;
       }
     });
   }
@@ -955,12 +956,12 @@ class Topic {
         this.li.classList.remove('statusSelected');
       }
     });
-    this.li.onclick = (e) => {
+    this.li.addEventListener('click', (e) => {
       e.preventDefault();
       this.load()
         .then(() => console.debug("Topic load successful"))
         .catch(err => console.error("Topic load failed; %s", err));
-    };
+    });
 
     this.li.appendChild(this.icon);
     this.li.appendChild(this.divTopic);
@@ -1088,7 +1089,7 @@ class Topic {
     // inform other browser window instances about the updated tabs
     browser.runtime.sendMessage({
       action: 'TopicInfoUpdated',
-      detail: {topicId: this.id, tabs: this.tabs}
+      detail: {source: 'Topic.saveTabsToDb', topicId: this.id, tabs: this.tabs}
     });
     return true;
   }
@@ -1106,12 +1107,12 @@ class Topic {
       browser.windows.update(this.windowId, {drawAttention: false})
         .then(() => {
           console.debug("Topic.load() topicId=%d, existing windowId=%d focused", this.id, this.windowId);
-          chrome.windows.update(this.windowId, {focused: true, drawAttention: true});
+          browser.windows.update(this.windowId, {focused: true, drawAttention: true});
         });
     } else {
       console.debug("Topic.load() topicId=%d, new window will be opened", this.id);
       let newWindow = await browser.windows.create({
-        url: chrome.extension.getURL("popup.html"),
+        url: browser.extension.getURL('popup.html'),
         setSelfAsOpener: true
       });
       this.windowId = newWindow.id;
@@ -1125,7 +1126,7 @@ class Topic {
       // Note: open topic tabs will be done by the new windows popup instance
 
       // Send global TopicLoad event, so all other Sidebar instances can get it
-      chrome.runtime.sendMessage({
+      browser.runtime.sendMessage({
         action: 'TopicLoaded',
         detail: {id: this.id, windowId: newWindow.id}
       });
@@ -1296,7 +1297,7 @@ class BrowsingWindow {
         this.icon.setAttribute('src', favLink.href);
       }
       if (this.pt.whoIAm.currentWindow.id === this.id) {
-        // update popup title (Chrome Window Title) if this is the title of current window
+        // update popup title (Browser Window Title) if this is the title of current window
         document.title = this.title;
         // update Main view title
         this.pt.refMain.updateTitle(this.title);
@@ -1671,7 +1672,7 @@ class Tab {
     });
 
     // hide internal tabs (user should not mess with)
-    if (this.tab.url.match(chrome.extension.getURL(''))) {
+    if (this.tab.url.match(browser.extension.getURL(''))) {
       this.li.classList.add('w3-hide');
     }
 
@@ -1747,7 +1748,6 @@ class Tab {
       this.tab = newTab;
     }
 
-    // todo if a tab is loaded but never received updated title, url should be used
     if (info && 'status' in info) {
       if (info.status === 'complete') {
         this.spanTabTitle.innerText = newTab.title;
@@ -2043,11 +2043,11 @@ class FavoriteTab {
 
   function replace_i18n(obj, tag) {
     let msg = tag.replace(/__MSG_(\w+)__/g, function (match, v1) {
-      return v1 ? chrome.i18n.getMessage(v1) : '';
+      return v1 ? browser.i18n.getMessage(v1) : '';
     });
     if (msg !== tag) {
-      if (msg === "") {
-        obj.innerText = "ERRTRANS";
+      if (msg === '') {
+        obj.innerText = 'ERRTRANS';
       } else {
         obj.innerText = msg;
       }

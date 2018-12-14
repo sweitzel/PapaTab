@@ -23,5 +23,5 @@
   },
   "optional_permissions": [ "bookmarks", "management", "system.memory" ],
   "permissions": [ "tabs", "activeTab", "sessions", "contextMenus", "notifications", "storage", "chrome://favicon/" ],
-  "minimum_chrome_version": "54"
+  "minimum_chrome_version": "71"
 }
