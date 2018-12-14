@@ -112,7 +112,7 @@ function dbUpdateTopic(topicId, changeInfo) {
   return debe.topics.update(topicId, changeInfo);
 }
 
-/* Returns all Topics as array */
+/* Returns all Topics as array (Promise) */
 function dbGetTopicsAsArray() {
   return debe.topics.orderBy('order').toArray();
 }
@@ -123,6 +123,59 @@ function dbGetTopicBy(whereVal, equalsVal) {
 }
 
 //endregion
+
+/*
+ * try to match given windowId to a Topic
+ *   - first try to lookup windowId in DB (windowId will be same as long Browser is not completely closed)
+ *     (this is the most reliable)
+ *   - else compare Tabs of open windows with the saved Topics (must be exactly matching)
+ * @return returns Topic if found, else undefined
+ */
+async function matchWindowToTopic(windowId) {
+  // try to find (not deleted) topic which matches windowId
+  let topic = await dbGetTopicBy('windowId', windowId).first();
+  if (topic) {
+    if ('deleted' in topic) {
+      console.debug("matchWindowToTopic() - ignore deleted topic %O", topic);
+    } else {
+      console.debug("matchWindowToTopic() - found Topic=%s (%d) via matching windowId=%d", topic.name, topic.id, windowId);
+      return topic;
+    }
+  } else {
+    // get current windows tabs
+    let currentTabs = await browser.tabs.query({windowId: windowId});
+    if (currentTabs) {
+      // exclude extension Tabs
+      currentTabs = currentTabs.filter(tab => !tab.url.includes(browser.extension.getURL('')));
+      // foreach tab >> tab URL equal?
+      let topics = await dbGetTopicsAsArray();
+      for (topic of topics) {
+        // amount of tabs equal?
+        if (currentTabs.length !== topic.tabs.length) {
+          console.log("matchWindowToTopic(): Topic tabs=%d, current tabs=%d -> no match.", topic.tabs.length, currentTabs.length);
+          continue;
+        }
+        let match = 0;
+        for (let i=0; i<topic.tabs.length; i++) {
+          let tA = topic.tabs[i];
+          let tB = currentTabs[i];
+          if (tA.url === tB.url) {
+            console.log("MATCH topicUrl=%s, thisUrl=%s", tA.url, tB.url);
+            match++;
+          } else {
+            console.log("NOMATCH topicUrl=%s, thisUrl=%s", tA.url, tB.url);
+            break;
+          }
+        }
+        if (match === topic.tabs.length) {
+          // found - update windowId in DB
+          await dbUpdateTopic(topic.id, {windowId: windowId});
+          return topic;
+        }
+      }
+    }
+  }
+}
 
 //region Favicon handling
 function invertColor(hex) {
@@ -260,4 +313,19 @@ function timeDifference(previous) {
   else {
     return rtf.format(-Math.round(elapsed/msPerYear), 'year');
   }
+}
+
+/*
+ * remove non-whitelisted keys from given tabs list
+ */
+function sanitizeTabs(tabs) {
+  // only save whitelisted information to DB
+  let keyWhitelist = ['active', 'favIconUrl', 'index', 'pinned', 'selected', 'status', 'title', 'url'];
+
+  tabs.forEach((obj) => {
+    Object.keys(obj).forEach((key) => {
+      if (keyWhitelist.indexOf(key) === -1)
+        delete obj[key];
+    });
+  });
 }

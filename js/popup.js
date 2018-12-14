@@ -1078,6 +1078,8 @@ class Topic {
     let tabs = await browser.tabs.query({windowId: this.windowId});
     // exclude extension Tabs
     tabs = tabs.filter(tab => !tab.url.includes(browser.extension.getURL('')));
+    // remove certain space-wasting information before storing it to DB
+    sanitizeTabs(tabs);
     console.debug("Topic(%d).saveTabsToDb(): Found tabs (filter ext tab): %O ", this.id, tabs);
     // store Tabs to DB
     await dbUpdateTopic(this.id, {tabs: tabs});
@@ -2097,10 +2099,8 @@ class FavoriteTab {
 
     // first determine simply which window currently running on
     ret.currentWindow = await browser.windows.getCurrent({populate: true});
-    let topic = await dbGetTopicBy('windowId', ret.currentWindow.id).first();
-    if (topic && 'deleted' in topic) {
-      console.debug("detectWhoIAm() - ignore deleted topic %O", topic);
-    } else {
+    let topic = await matchWindowToTopic(ret.currentWindow.id);
+    if (topic) {
       ret.currentTopic = topic;
     }
     console.debug("detectWhoIAm(): windowId=%d, Topic=%O", ret.currentWindow.id, ret.currentTopic);
