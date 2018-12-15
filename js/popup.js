@@ -79,24 +79,6 @@ class PopupSidebar {
     if (typeof this.sortableTopics !== 'undefined') {
       this.sortableTopics.destroy();
     }
-    /*
-    // TODO find better place for Theme Switcher
-    // themeSwitcher
-    let light = document.getElementById("lightTheme");
-    let dark = document.getElementById("darkTheme");
-    disableStylesheet(dark);
-    enableStylesheet(light);
-    let button1 = document.getElementById("themeSwitcher");
-    button1.onclick = function () {
-      if (button1.checked) {
-        disableStylesheet(light);
-        enableStylesheet(dark);
-      } else {
-        disableStylesheet(dark);
-        enableStylesheet(light);
-      }
-    };
-    */
 
     // get topics from Database
     let topics = await dbGetTopicsAsArray();
@@ -363,7 +345,7 @@ class PopupMain {
     this.pt = pt;
     // DOM Nodes
     this.nodes = {
-      div: document.getElementById('divMain'),
+      div: document.getElementById('divMainFlex'),
       divOptions: document.getElementById('divOptions'),
       header: document.getElementById('hMainHeader'),
       ulActiveTabs: document.getElementById('ulMainActiveTabs'),
@@ -455,19 +437,36 @@ class PopupMain {
   // draw options for current Topic
   drawTopicOptions() {
     this.nodes.divOptions.innerHTML = "";
+    // themeSwitcher (maybe not the best location)
+    let light = document.getElementById("lightTheme");
+    let dark = document.getElementById("darkTheme");
+    dark.disabled = true;
+    light.disabled = false;
+    let butt = document.getElementById("cb1");
+    butt.onclick = function () {
+      if (butt.checked) {
+        light.disabled = true;
+        dark.disabled = false;
+      } else {
+        light.disabled = false;
+        dark.disabled = true;
+      }
+    };
+
     if (!this.pt.whoIAm || !this.pt.whoIAm.currentTopic) {
       // its a regular Window
       // add button to convert to Topic
       let divConvert = document.createElement('div');
-      divConvert.classList.add('w3-display-topright', 'w3-xlarge', 'far', 'fa-save', 'tooltip', 'my-zoom-hover');
+      divConvert.classList.add('w3-display-topright', 'w3-xxlarge', 'w3-text-theme-light', 'far', 'fa-save', 'tooltip', 'my-zoom-hover');
       divConvert.id = 'tipSaveAsTopic';
-      divConvert.style.margin = '60px';
+      divConvert.style.marginRight = '35px';
+      divConvert.style.marginTop = '60px';
       divConvert.style.position = 'absolute';
       let spanConvertHelp = document.createElement('span');
-      spanConvertHelp.classList.add('tooltiptext');
+      spanConvertHelp.classList.add('tooltiptext', 'w3-text-theme-light');
       spanConvertHelp.innerText = getTranslationFor("tipSaveAsTopic");
-      spanConvertHelp.style.top = '82px';
-      spanConvertHelp.style.right = '35px';
+      spanConvertHelp.style.top = '65px';
+      spanConvertHelp.style.right = '100px';
 
       divConvert.addEventListener('click', (e) => {
         e.preventDefault();
@@ -504,24 +503,24 @@ class PopupMain {
     inputName.style.color = '36px';
 
     let spanCreateTime = document.createElement('span');
-    spanCreateTime.classList.add('w3-small', 'w3-opacity-min');
+    spanCreateTime.classList.add('w3-small', 'w3-opacity-min', 'w3-text-theme-light');
     spanCreateTime.innerText = getTranslationFor('Created') + ' ' + timeDifference(this.pt.whoIAm.currentTopic.createdTime);
     spanCreateTime.style.userSelect = 'none';
-    spanCreateTime.style.right = '35px';
+    spanCreateTime.style.right = '6%';
     spanCreateTime.style.top = '97%';
-    spanCreateTime.style.position = 'absolute';
+    spanCreateTime.style.position = 'fixed';
 
     let divOptionsRight = document.createElement('div');
     divOptionsRight.classList.add('w3-right');
 
     // Trash
     let iTrash = document.createElement('i');
-    iTrash.classList.add('w3-xlarge', 'w3-padding-24', 'w3-margin-right', 'fa', 'fa-trash-alt', 'my-zoom-hover', 'tooltip')
+    iTrash.classList.add('w3-xxlarge', 'w3-padding-24', 'w3-margin-right', 'w3-text-theme', 'fa', 'fa-trash-alt', 'my-zoom-hover', 'tooltip')
     iTrash.id = 'tipTopicToTrash';
     let spanTrashTip = document.createElement('span');
-    spanTrashTip.classList.add('tooltiptext');
+    spanTrashTip.classList.add('tooltiptext', 'w3-text-theme-light');
     spanTrashTip.style.right = '80px';
-    spanTrashTip.style.top = '120px';
+    spanTrashTip.style.top = '131px';
     spanTrashTip.innerText = getTranslationFor('tipMoveTopicToTrash', 'Move Topic to Trash');
 
     divOptionsRight.appendChild(iTrash);
@@ -538,9 +537,9 @@ class PopupMain {
     inputColor.style.width = '42px';
     inputColor.style.cursor = 'pointer';
     let spanColorTip = document.createElement('span');
-    spanColorTip.classList.add('tooltiptext');
+    spanColorTip.classList.add('tooltiptext', 'w3-text-theme-light');
     spanColorTip.style.right = '25px';
-    spanColorTip.style.top = '120px';
+    spanColorTip.style.top = '130px';
     spanColorTip.innerText = getTranslationFor('tipChangeTopicColor', 'Change topic color');
 
     divOptionsRight.appendChild(inputColor);
@@ -822,7 +821,7 @@ class PopupMain {
 
   filterTabs(searchTerm) {
     console.debug("NEW filterTabs(): Search for %s", searchTerm);
-    if (!this.tabs) {
+    if (!this.tabs || typeof searchTerm === 'undefined') {
       return;
     }
     let foundByTitle = 0;
@@ -830,10 +829,10 @@ class PopupMain {
     for (let tab of this.tabs) {
       let title = tab.spanTabTitle.textContent;
       let url = tab.spanTabUrl.textContent;
-      if (title.toUpperCase().indexOf(searchTerm.toUpperCase()) > -1) {
+      if (title && title.toUpperCase().indexOf(searchTerm.toUpperCase()) > -1) {
         foundByTitle++;
         tab.li.style.display = 'block';
-      } else if (url.toUpperCase().indexOf(searchTerm.toUpperCase()) > -1) {
+      } else if (url && url.toUpperCase().indexOf(searchTerm.toUpperCase()) > -1) {
         foundByUrl++;
         tab.li.style.display = 'block';
       } else {
@@ -985,6 +984,7 @@ class Topic {
     this.li.style.padding = 'unset';
     this.li.style.lineHeight = '16px';
     this.li.style.height = '45px';
+    this.li.style.width = '285px';
     // item.id is the Dexie database id
     if (typeof this.id !== 'undefined') {
       this.li.setAttribute('id', 'topic-' + this.id);
@@ -1294,10 +1294,11 @@ class BrowsingWindow {
   // add one window to the given list
   add(ul) {
     this.li = document.createElement('li');
-    this.li.classList.add('w3-bar', 'w3-button', 'w3-hover-theme');
+    this.li.classList.add('w3-bar', 'w3-button');
     // this.id is the Window Id
     this.li.style.padding = '1px 0px';
     this.li.style.lineHeight = '20px';
+    this.li.style.width = '285px';
     this.li.setAttribute("id", "window-" + this.id);
 
     // color-icon
@@ -1314,7 +1315,7 @@ class BrowsingWindow {
 
     // link
     let divWindow = document.createElement('div');
-    divWindow.classList.add('w3-bar-item', 'w3-left-align', 'w3-text-theme-light');
+    divWindow.classList.add('w3-bar-item', 'w3-left-align');
     divWindow.style.width = '150px';
     this.updateWindowTitle();
 
@@ -2172,15 +2173,6 @@ class FavoriteTab {
       replace_i18n(obj, tag);
     }
     */
-  }
-
-  // toggle CSS stylesheet for Theme selection
-  function enableStylesheet(node) {
-    node.disabled = false;
-  }
-
-  function disableStylesheet(node) {
-    node.disabled = true;
   }
 
   //endregion

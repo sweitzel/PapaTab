@@ -67,6 +67,10 @@
     "message": "Schließen",
     "description": "General: To close something"
   },
+  "Remove": {
+    "message": "Entfernen",
+    "description": "General: Remove something"
+  },
   "Pin": {
     "message": "Anheften",
     "description": "General: Pin a tab"

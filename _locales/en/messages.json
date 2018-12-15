@@ -71,6 +71,10 @@
     "message": "Close",
     "description": "General: To close something"
   },
+  "Remove": {
+    "message": "Remove",
+    "description": "General: Remove something"
+  },
   "SaveTab": {
     "message": "Remember",
     "description": "General: Save a tab"

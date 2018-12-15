@@ -23,4 +23,12 @@
 .w3-hover-theme-light:hover{background-color:#7d97a5 !important}
 .w3-text-theme-light {color:#f5f7f8 !important}
 
-
+body {color: #000 !important; background-image: linear-gradient(to left, #b0c5f7 10%, #e1f9ff 80%)}
+#divSidebar {color: #000 !important; background-image: linear-gradient(to right, #b0c5f7 95%, #e1f9ff 100%)}
+#divTop {color: #000 !important; background-image: linear-gradient(to right, #b0c5f7 95%, #e1f9ff  100%)}
+#ulMainActiveTabs {background-color: #d7ebff94}
+#ulMainActiveTabs div:hover {background-color: #00000020 !important}
+#ulMainSavedTabs {background-color: #d7ebff94}
+#ulMainSavedTabs div:hover {background-color: #00000020 !important}
+#ulSidebarTopics li:hover {color: black !important; background-color: #00000020 !important}
+#ulSidebarWindows li:hover {color: black !important; background-color: #00000020 !important}

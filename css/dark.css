@@ -10,7 +10,7 @@
 .w3-theme-d5 {color:#fff !important; background-color:#303030 !important}
 
 .w3-theme-light {color:#000 !important; background-color:#f6f6f6 !important}
-.w3-theme-dark {color:#fff !important; background-color:#303030 !important}
+.w3-theme-dark {color:#fff !important; background-color:#002333 !important}
 .w3-theme-action {color:#fff !important; background-color:#303030 !important}
 
 .w3-theme {color:#fff !important; background-color:#616161 !important}
@@ -22,3 +22,13 @@
 .w3-hover-border-theme:hover {border-color:#616161 !important}
 .w3-hover-theme-light:hover{background-color:#818181 !important}
 .w3-text-theme-light {color:#dfdfdf !important}
+
+body {color: #000 !important; background-image: linear-gradient(to left, #002333 10%, silver 80%)}
+#divSidebar {color: #fff !important; background-image: linear-gradient(to right, #002333 95%, silver 100%)}
+#divTop {color: #000 !important; background-image: linear-gradient(to right, #002333 95%, silver 100%)}
+#ulMainActiveTabs {background-color: #a0b0c094}
+#ulMainActiveTabs div:hover {background-color: #00000020 !important}
+#ulMainSavedTabs {background-color: #a0b0c094}
+#ulMainSavedTabs div:hover {background-color: #00000020 !important}
+#ulSidebarTopics li:hover {color: white !important; background-color: #00000060 !important}
+#ulSidebarWindows li:hover {color: white !important; background-color: #00000060 !important}
