@@ -839,6 +839,16 @@ class PopupMain {
             }
           }
           break;
+        case 'TabReplaced':
+          // TabReplaced can happen e.g. when Tab gets discarded.
+          // No windowId is received, so check if old TabId is know to this window
+          console.log("xxx %O", request.detail);
+          let tab = this.tabs.find(tab => tab.id === request.detail.removedTabId);
+          if (tab) {
+            console.debug("Browser Event TabReplaced received: detail=%O", request.detail);
+            tab.id = request.detail.addedTabId;
+          }
+          break;
       }
     });
   }

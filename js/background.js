@@ -52,6 +52,15 @@ var papaTabs = (function () {
     sendRuntimeMessage('TabUpdated', {tabId: tabId, changeInfo: changeInfo, tab: tab});
   });
 
+  browser.tabs.onReplaced.addListener(function (addedTabId, removedTabId) {
+    if (debug) {
+      console.debug('tab().onReplaced listener fired: addedTabId=%d, removedTabId=%d', addedTabId, removedTabId);
+    }
+    // send event to inform all instances about the updated Tab and update their sidebar / main view if needed
+    sendRuntimeMessage('TabReplaced', {addedTabId: addedTabId, removedTabId: removedTabId});
+  });
+
+
   browser.windows.onRemoved.addListener(function (windowId) {
     if (debug) {
       console.debug('window(%d).onRemoved listener fired.', windowId);
@@ -154,7 +163,7 @@ async function openPapaTab(param) {
       continue;
     }
     // if open, ensure it is pinned (user might have accidentally un-pinned it)
-    browser.tabs.update(tabs[i].id, {pinned: true, highlighted: true, active: true});
+    browser.tabs.update(tabs[i].id, {pinned: true, highlighted: true, active: true, autoDiscardable: false});
   }
   if (tabs.length === 0) {
     await browser.tabs.create({

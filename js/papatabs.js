@@ -320,7 +320,7 @@ function timeDifference(previous) {
  */
 function sanitizeTabs(tabs) {
   // only save whitelisted information to DB
-  let keyWhitelist = ['active', 'favIconUrl', 'index', 'pinned', 'selected', 'status', 'title', 'url'];
+  let keyWhitelist = ['active', 'favIconUrl', 'index', 'pinned', 'selected', 'title', 'url'];
 
   tabs.forEach((obj) => {
     Object.keys(obj).forEach((key) => {
