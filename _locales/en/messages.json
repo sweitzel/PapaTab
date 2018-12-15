@@ -3,6 +3,10 @@
     "message": "PapaTab",
     "description": "Main: PapaTab"
   },
+  "SearchBarPlaceholder": {
+    "message": "Search Tab Title or URL (also with 's')",
+    "description": "Main/Top: Search Bar Placeholder for entering the Tabs to look for"
+  },
   "topics": {
     "message": "Topics",
     "description": "Sidebar: Topics"

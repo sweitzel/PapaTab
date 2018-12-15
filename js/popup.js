@@ -367,7 +367,8 @@ class PopupMain {
       divOptions: document.getElementById('divOptions'),
       header: document.getElementById('hMainHeader'),
       ulActiveTabs: document.getElementById('ulMainActiveTabs'),
-      ulSavedTabs: document.getElementById('ulMainSavedTabs')
+      ulSavedTabs: document.getElementById('ulMainSavedTabs'),
+      inputSearchBar: document.getElementById('inputSearchBar')
     };
     // store instances of Tab, with index = tab.id
     this.tabs = [];
@@ -380,6 +381,7 @@ class PopupMain {
     this.drawTopicOptions();
     this.drawTabs();
     this.drawSavedTabs();
+    this.setupFilter();
     // restore previously open tabs (Topic)
     this.restoreTabs()
       .then()
@@ -562,7 +564,12 @@ class PopupMain {
           // inform other browser window instances about the updated tabs
           browser.runtime.sendMessage({
             action: 'TopicInfoUpdated',
-            detail: {source: 'PopupMain.drawTopicOptions', topicId: this.pt.whoIAm.currentTopic.id, name: inputName.value, color: inputColor.value}
+            detail: {
+              source: 'PopupMain.drawTopicOptions',
+              topicId: this.pt.whoIAm.currentTopic.id,
+              name: inputName.value,
+              color: inputColor.value
+            }
           });
           // reset input validation error
           inputName.setCustomValidity("");
@@ -598,7 +605,12 @@ class PopupMain {
           // inform other browser window instances about the updated tabs
           browser.runtime.sendMessage({
             action: 'TopicInfoUpdated',
-            detail: {source: 'PopupMain.drawTopicOptions', topicId: this.pt.whoIAm.currentTopic.id, name: inputName.value, color: inputColor.value}
+            detail: {
+              source: 'PopupMain.drawTopicOptions',
+              topicId: this.pt.whoIAm.currentTopic.id,
+              name: inputName.value,
+              color: inputColor.value
+            }
           }).then().catch(err => console.warn('Unable to send browser message: %O', err));
         })
         .catch(err => {
@@ -781,6 +793,80 @@ class PopupMain {
       }
       head.appendChild(favUrl);
     }
+  }
+
+  /*
+   * initialize List filter which is fed by the search bar
+   */
+  setupFilter() {
+    // search bar place holder
+    this.nodes.inputSearchBar.placeholder = getTranslationFor('SearchBarPlaceholder');
+    // jump to searchBar if 's' key is pressed
+    document.addEventListener('keyup', (event) => {
+      if ('key' in event) {
+        if (event.key === 's' && (document.activeElement && document.activeElement.id !== 'inputSearchBar')) {
+          this.nodes.inputSearchBar.focus();
+        }
+      }
+    });
+    // search bar event listener
+    this.nodes.inputSearchBar.addEventListener('keyup', () => {
+      this.filterTabs(this.nodes.inputSearchBar.value);
+      this.filterFavorites(this.nodes.inputSearchBar.value);
+    });
+    this.nodes.inputSearchBar.addEventListener('search', () => {
+      this.filterTabs(this.nodes.inputSearchBar.value);
+      this.filterFavorites(this.nodes.inputSearchBar.value);
+    });
+  }
+
+  filterTabs(searchTerm) {
+    console.debug("NEW filterTabs(): Search for %s", searchTerm);
+    if (!this.tabs) {
+      return;
+    }
+    let foundByTitle = 0;
+    let foundByUrl = 0;
+    for (let tab of this.tabs) {
+      let title = tab.spanTabTitle.textContent;
+      let url = tab.spanTabUrl.textContent;
+      if (title.toUpperCase().indexOf(searchTerm.toUpperCase()) > -1) {
+        foundByTitle++;
+        tab.li.style.display = 'block';
+      } else if (url.toUpperCase().indexOf(searchTerm.toUpperCase()) > -1) {
+        foundByUrl++;
+        tab.li.style.display = 'block';
+      } else {
+        // hide the LI
+        tab.li.style.display = 'none';
+      }
+    }
+    console.debug("DONE filterTabs(): Search for %s in active Tabs (foundByTitle=%d, foundByUrl=%d)",
+      searchTerm, foundByTitle, foundByUrl);
+  }
+
+  filterFavorites(searchTerm) {
+    if (!this.favorites) {
+      return;
+    }
+    let foundByTitle = 0;
+    let foundByUrl = 0;
+    for (let fav of this.favorites) {
+      let title = fav.spanTabTitle.textContent;
+      let url = fav.spanTabUrl.textContent;
+      if (title.toUpperCase().indexOf(searchTerm.toUpperCase()) > -1) {
+        foundByTitle++;
+        fav.li.style.display = 'block';
+      } else if (url.toUpperCase().indexOf(searchTerm.toUpperCase()) > -1) {
+        foundByUrl++;
+        fav.li.style.display = 'block';
+      } else {
+        // hide the LI
+        fav.li.style.display = 'none';
+      }
+    }
+    console.debug("filterFavorites(): Search for %s in favorite Tabs (foundByTitle=%d, foundByUrl=%d)",
+      searchTerm, foundByTitle, foundByUrl);
   }
 
   registerEvents() {
