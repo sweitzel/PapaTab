@@ -329,3 +329,31 @@ function sanitizeTabs(tabs) {
     });
   });
 }
+
+// switch/focus next browser window
+// todo: switch in the order of windows as displayed on Sidebar
+async function switchToWindow(nextOrLast) {
+  // does any window have focus?
+  let windows = await browser.windows.getAll({populate: false});
+  if (windows) {
+    for (let i = 0; i < windows.length; i++) {
+      let nexti = i+1;
+      let lasti = i-1;
+      if (nexti === windows.length) {
+        nexti = 0;
+      }
+      if (lasti < 0) {
+        lasti = windows.length - 1;
+      }
+      if (windows[i].focused === true) {
+        if (nextOrLast === 'next') {
+          // switch to next window
+          await browser.windows.update(windows[nexti].id, {focused: true});
+        } else {
+          // switch to last window
+          await browser.windows.update(windows[lasti].id, {focused: true});
+        }
+      }
+    }
+  }
+}

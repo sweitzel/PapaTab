@@ -13,7 +13,27 @@ var papaTabs = (function () {
   let debug = true;
 
   // LISTENERS
-  //browser.tabs.onCreated.addListener()
+
+  // hotkeys
+  browser.commands.onCommand.addListener((name) => {
+    if (debug) {
+      console.debug('browser.onCommand listener fired: name=%s', name);
+    }
+    switch (name) {
+      // switch to the next Browser window
+      case 'switch-next-window':
+        switchToWindow('next')
+          .then()
+          .catch(err => console.warn('switchToWindow problem: %O', err));
+        break;
+      // switch to the last Browser window
+      case 'switch-last-window':
+        switchToWindow('last')
+          .then()
+          .catch(err => console.warn('switchToWindow problem: %O', err));
+        break;
+    }
+  });
 
   //add listeners for session monitoring
   browser.tabs.onCreated.addListener(function (tab) {
@@ -179,3 +199,13 @@ async function openPapaTab(param) {
  *   this calls the openPapaTab with tabs.tab as parameter
  */
 browser.browserAction.onClicked.addListener(openPapaTab);
+
+/*
+// open Papatab in all Window
+browser.windows.getAll({populate: false})
+  .then((windows) => {
+    for (win of windows) {
+      openPapaTab({windowId: win.id});
+    }
+  }).catch(err => console.warn('Browser Window getAll problem: %O', err));
+*/

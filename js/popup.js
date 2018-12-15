@@ -229,7 +229,7 @@ class PopupSidebar {
     } else if (win) {
       win.updateWindowTitle();
     } else {
-      console.warn("PopupSidebar.updateTopicOrWindowInfo(): Neither Topic nor Window?");
+      console.warn('PopupSidebar.updateTopicOrWindowInfo(): Neither Topic nor Window (windowId=%d,topic=%O,win=%O)?', windowId, topic, win);
     }
   }
 
@@ -842,7 +842,6 @@ class PopupMain {
         case 'TabReplaced':
           // TabReplaced can happen e.g. when Tab gets discarded.
           // No windowId is received, so check if old TabId is know to this window
-          console.log("xxx %O", request.detail);
           let tab = this.tabs.find(tab => tab.id === request.detail.removedTabId);
           if (tab) {
             console.debug("Browser Event TabReplaced received: detail=%O", request.detail);
@@ -1895,10 +1894,11 @@ class Tab {
 
   static getFavIconSrc(url, favIconUrl) {
     //try to get best favicon url path
-    if (favIconUrl && favIconUrl.indexOf('chrome://theme') < 0) {
+    if (favIconUrl) {
       return favIconUrl;
     } else {
-      return 'chrome://favicon/' + url;
+      // return a default icon
+      return browser.extension.getURL('globe.png');
     }
   }
 
