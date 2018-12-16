@@ -5,9 +5,9 @@ This page is mainly development related. For usage related information check the
 
 ## Screenshots (2018-12-16)
 Chrome:
-[[https://imgur.com/flapj6D|alt=Chrome]]
+[Chrome](https://i.imgur.com/flapj6D.png)
 Firefox:
-[[https://imgur.com/zueTQkG|alt=Firefox]]
+[Firefox](https://i.imgur.com/zueTQkG.png)
 
 ## Getting Started
 
