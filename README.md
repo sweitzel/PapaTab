@@ -3,11 +3,31 @@
 PapaTab is a browser extension intended to improve user experience for Tab- and Browsing Topic management.
 This page is mainly development related. For usage related information check the Extension Stores of the supported Browsers.
 
-## Screenshots (2018-12-16)
-Chrome:
+## Main Features
+
+The following main features are implemented:
+- grouping of Tabs by Topics
+- storage of Topics in IndexedDB
+- define Topic name and color to be easier distinguishable
+- support localization (currently English and German implemented)
+- simple search tabs by Title or URL in current Window or Topic
+- day/night theme
+- WebExtension, therefore potentially compatible with all modern Browsers
+
+Planned next:
+- recycle bin (undo topic deletion)
+  - topics are already now marked as deleted, not really deleted from DB
+- export/import (JSON)
+- cleanup of tabs (e.g. Google tabs)
+- duplicate tab detection
+- use cloud sync (Sync Storage)
+
+## Screenshot
+
 ![Chrome](https://i.imgur.com/flapj6D.png)
-Firefox:
-![Firefox](https://i.imgur.com/zueTQkG.png)
+
+(other)
+[Firefox](https://i.imgur.com/zueTQkG.png)
 
 ## Getting Started
 
@@ -15,8 +35,8 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Supported Browsers
 
-* Google Chrome (tested version >=71)
-* Mozilla Firefox (tested version >= 64)
+- Google Chrome (tested version >=71)
+- Mozilla Firefox (tested version >= 64)
 
 ## Contributing
 
