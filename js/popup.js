@@ -211,7 +211,7 @@ class PopupSidebar {
     } else if (win) {
       win.updateWindowTitle();
     } else {
-      console.warn('PopupSidebar.updateTopicOrWindowInfo(): Neither Topic nor Window (windowId=%d,topic=%O,win=%O)?', windowId, topic, win);
+      console.warn('PopupSidebar.updateTopicOrWindowInfo(): Neither Topic nor Window ' + windowId);
     }
   }
 
@@ -840,7 +840,7 @@ class PopupMain {
     // jump to searchBar if 's' key is pressed
     document.addEventListener('keyup', (event) => {
       if ('key' in event) {
-        if (event.key === 's' && (document.activeElement && document.activeElement.id !== 'inputSearchBar')) {
+        if (event.key === 's' && (document.activeElement && document.activeElement.nodeName !== 'INPUT')) {
           this.nodes.inputSearchBar.focus();
         }
       }

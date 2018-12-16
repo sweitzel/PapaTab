@@ -148,7 +148,7 @@ var papaTabs = (function () {
   async function handleCreateWindow() {
     let newWindow = await browser.windows.create();
     if (newWindow) {
-      await openPapaTab({windowId: newWindow.id});
+      //await openPapaTab({windowId: newWindow.id});
     }
     return newWindow.id;
   }
@@ -158,14 +158,12 @@ var papaTabs = (function () {
 }()); // end papaTabs
 
 function sendRuntimeMessage(action, detail, thenAction) {
-  if (browser.runtime.onMessage.hasListeners()) {
-    browser.runtime.sendMessage({
-      action: action,
-      detail: detail
-    }).then(thenAction)
-    // todo: check how to prevent this: Could not establish connection. Receiving end does not exist. (happens if popup not open)
-      .catch(err => console.info('%s sendMessage problem: %s', action, err.message));
-  }
+  browser.runtime.sendMessage({
+    action: action,
+    detail: detail
+  }).then(thenAction)
+  // todo: check how to prevent this: Could not establish connection. Receiving end does not exist. (happens if popup not open)
+    .catch(err => console.info('%s sendMessage problem: %s', action, err.message));
 }
 
 async function openPapaTab(param) {
@@ -177,11 +175,22 @@ async function openPapaTab(param) {
   for (let i = 0; i < tabs.length; i++) {
     if (i > 0) {
       await browser.tabs.remove(tabs[i].id);
-      console.debug("Closed additional PapaTab instance");
+      console.debug("Closed additional PapaTab instance (tab=%d)", tabs[i].id);
       continue;
     }
     // if open, ensure it is pinned (user might have accidentally un-pinned it)
-    browser.tabs.update(tabs[i].id, {pinned: true, highlighted: true, active: true, autoDiscardable: false});
+    let params = {
+      pinned: true,
+      highlighted: true,
+      active: true
+    };
+    // autoDiscardable not supported on all browsers
+    if ('autoDiscardable' in tabs[i]) {
+      params['autoDiscardable'] = false;
+    }
+    browser.tabs.update(tabs[i].id, params)
+      .then(console.debug("openPapaTab(): tab with id %d updated (pined...)", tabs[i].id))
+      .catch(err => console.warn('openPapaTab() failed to update tab err=%O', err));
   }
   if (tabs.length === 0) {
     await browser.tabs.create({
