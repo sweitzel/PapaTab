@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
-  "name": "Papatabs",
-  "version": "0.1",
-  "description": "Just another tab and session manager extension",
+  "name": "__MSG_appName__",
+  "description": "__MSG_appDesc__",
+  "version": "0.2.1",
   "default_locale": "en",
   "background": {
     "scripts": [

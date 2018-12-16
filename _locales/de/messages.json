@@ -1,7 +1,11 @@
 {
-  "ExtensionName": {
+  "appName": {
     "message": "PapaTab",
-    "description": "Main: PapaTab"
+    "description": "Extension Name"
+  },
+  "appDesc": {
+    "message": "Eine Browser Erweiterung für besseres Tab Management, insbesondere für Personen welche gern viele Tabs offen haben (wie mein Papa).",
+    "description": "Extension Short Description"
   },
   "SearchBarPlaceholder": {
     "message": "Suche nach Tab Titel oder URL (auch mit 's')",

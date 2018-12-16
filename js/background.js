@@ -90,6 +90,10 @@ var papaTabs = (function () {
   });
 
   browser.windows.onCreated.addListener((window) => {
+    if ('type' in window && window.type !== 'normal') {
+      // only handle normal Browser windows
+      return;
+    }
     if (debug) {
       console.debug('window.onCreated listener fired: %O', window);
     }
