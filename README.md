@@ -1,6 +1,8 @@
 # PapaTab Browser Extension
 
-PapaTab is a browser extension intended to improve user experience for Tab- and Browsing Topic management.
+PapaTab is a browser extension intended to improve user experience for Tab- and Browsing Topic management. It should be benefitial especially for users which like to have many Browser windows with a lot of Tabs open all the time. 
+The extension is designed with simplicity and data privacy in mind. Therefore no data related to the user browsing behaviour will be transmitted to external locations. The only exception is opt-in storage to the Sycn Storage supported by various browsers, to enable synchronisation between a users browser running on several devices.
+
 This page is mainly development related. For usage related information check the Extension Stores of the supported Browsers.
 
 ## Main Features
@@ -22,7 +24,7 @@ Planned next:
 - proper drag and drop (at least drag a tab to another topic)
 - cleanup of tabs (e.g. Google tabs)
 - duplicate tab detection
-- use cloud sync (Sync Storage)
+- support opt-in Cloud Sync (Sync Storage)
 
 ## Screenshot
 
@@ -33,7 +35,8 @@ Planned next:
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+Contributors or testers can download the Extension from Github and install manually to their Browser. Please refer to the Browser instruction how to do that.
+End users should only install PapaTab via the Browsers Extension store.
 
 ### Supported Browsers
 
