@@ -7,6 +7,7 @@ This page is mainly development related. For usage related information check the
 
 The following main features are implemented:
 - grouping of Tabs by Topics
+  - for each Topic, tagging tabs as Favorite for easier restore of closed tabs.
 - storage of Topics in IndexedDB
 - define Topic name and color to be easier distinguishable
 - support localization (currently English and German implemented)
@@ -17,7 +18,8 @@ The following main features are implemented:
 Planned next:
 - recycle bin (undo topic deletion)
   - topics are already now marked as deleted, not really deleted from DB
-- export/import (JSON)
+- Data export/import (JSON)
+- proper drag and drop (at least drag a tab to another topic)
 - cleanup of tabs (e.g. Google tabs)
 - duplicate tab detection
 - use cloud sync (Sync Storage)
