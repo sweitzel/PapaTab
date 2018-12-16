@@ -10,13 +10,12 @@
       "js/dexie.js",
       "js/papatabs.js",
       "js/background.js"
-    ],
-    "persistent": false
+    ]
   },
   "icons": {
-    "16": "icon16.png",
-    "64": "icon64.png",
-    "128": "icon128.png"
+    "16": "./icon16.png",
+    "64": "./icon64.png",
+    "128": "./icon128.png"
   },
   "browser_action": {
     "default_title": "Open Papatab overview"
@@ -31,18 +30,16 @@
       "suggested_key": {
         "default": "Ctrl+Shift+PageUp"
       },
-      "global": true,
       "description": "Switch to the last window."
     },
     "switch-last-window": {
       "suggested_key": {
         "default": "Ctrl+Shift+PageDown"
       },
-      "global": true,
       "description": "Switch to the next window."
     }
   },
-  "optional_permissions": [ "bookmarks", "management", "system.memory", "chrome://favicon/", "contextMenus" ],
+  "optional_permissions": [ "bookmarks", "contextMenus" ],
   "permissions": [ "tabs", "sessions", "storage" ],
   "minimum_chrome_version": "71"
 }

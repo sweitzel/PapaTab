@@ -296,6 +296,7 @@ class PopupSidebar {
           // if a Topic is loaded, WindowCreated will also be sent
           // Note: if WindowCreated happens before TopicLoaded, then windowId is unknown and this will not work here
           else if (topic = this.getTopicForWindowId(request.detail.window.id)) {
+            console.log("XXX WindowCreated -> set Topic Open (id=%d)", topic.id);
             topic.setOpen();
           }
           else {
@@ -303,8 +304,12 @@ class PopupSidebar {
           }
           break;
         case 'WindowRemoved':
-          console.debug("Chrome WindowRemoved received: detail=%O", request.detail);
-          if (topic = this.getTopicForWindowId(request.detail.windowId)) {
+          console.debug("Browser WindowRemoved received: detail=%O", request.detail);
+          if ('converted' in request.detail) {
+            // a Topic can be converted to a Window, in that case WindowRemoved should not touch the Topic
+            this.removeWindow(request.detail.windowId);
+          } else if (topic = this.getTopicForWindowId(request.detail.windowId)) {
+            // A WindowRemoved for a Topic, set Topic to closed
             topic.setClosed();
             this.removeWindow(request.detail.windowId);
           } else {
@@ -655,16 +660,36 @@ class PopupMain {
    *       Tabs will be initialized by PopupMain.draw()
    */
   async restoreTabs() {
+    // close undesired tabs
+    async function closeSomeTabs() {
+      let tabs = await browser.tabs.query({currentWindow: true});
+      let tabCount = tabs.length;
+      for (let tab of tabs) {
+        console.log("xxx %d=%s", tab.index, tab.url);
+        if (tab.url.startsWith('about:') || tab.url.startsWith('chrome://newtab')) {
+          console.debug('restoreTabs() closed tab before restore: %d=%s', tab.index, tab.url);
+          await browser.tabs.remove(tab.id);
+          tabCount--;
+        }
+      }
+      return tabCount;
+    }
+    let tabCount = await closeSomeTabs();
+
     if (this.pt.whoIAm && this.pt.whoIAm.currentTopic && 'tabs' in this.pt.whoIAm.currentTopic) {
       // check if restore is needed (might be just a popup page refresh, or session restore)
-      // todo check if this is good enough
-      if (this.pt.whoIAm.currentWindow.tabs.length !== 1) {
-        console.debug("PopupMain.restoreTabs(); restoring Tabs aborted, already %d tabs present", this.pt.whoIAm.currentWindow.tabs.length);
+      if (tabCount !== 1) {
+        console.debug("PopupMain.restoreTabs(); restoring Tabs aborted, already %d tabs present", tabCount);
         return false;
       }
       console.debug("PopupMain.restoreTabs(); restoring Tabs for Topic %s", this.pt.whoIAm.currentTopic.name);
       // topic tabs are already loaded from Db by Topic init
       for (let tab of this.pt.whoIAm.currentTopic.tabs) {
+        /*
+        if (tab.url.startsWith('about:')) {
+          continue;
+        }
+        */
         // url
         // active
         // title
@@ -1120,6 +1145,7 @@ class Topic {
   setOpen() {
     console.debug("Topic(%d).setOpen() called", this.id);
     if (this.divTopicOpen) {
+      console.log("xxx REMOVED w3-hide from divTopicOpen");
       this.divTopicOpen.classList.remove('w3-hide');
     }
   }
@@ -1127,12 +1153,14 @@ class Topic {
   setClosed() {
     console.debug("Topic(%d).setClosed() called", this.id);
     if (this.divTopicOpen) {
+      console.log("xxx ADDED w3-hide to divTopicOpen %O", this.divTopicOpen);
       this.divTopicOpen.classList.add('w3-hide');
     }
     // update database entry
-    dbUpdateTopic(this.id, {windowId: undefined}).then(() => {
+    dbUpdateTopic(this.id, {windowId: undefined}).then((updated) => {
+      console.log("xxx setClosed db updated (updated=%s)", updated);
       this.windowId = undefined;
-    });
+    }).catch(err => console.warn('Topic.setClosed() problem: %O', err));
   }
 
   /*
@@ -1220,17 +1248,15 @@ class Topic {
         });
     } else {
       console.debug("Topic.load() topicId=%d, new window will be opened", this.id);
-      let newWindow = await browser.windows.create({
-        url: browser.extension.getURL('popup.html'),
-        setSelfAsOpener: true
-      });
+      // only for chrome: setSelfAsOpener: true
+      let newWindow = await browser.windows.create();
       this.windowId = newWindow.id;
       // store windowId to DB (so when loading the window it knows which topic it belongs to)
       await dbUpdateTopic(this.id, {windowId: newWindow.id});
 
       // open extension tab
-      let bg = browser.extension.getBackgroundPage();
-      await bg.openPapaTab({windowId: newWindow.id});
+      //let bg = browser.extension.getBackgroundPage();
+      //await bg.openPapaTab({windowId: newWindow.id});
 
       // Note: open topic tabs will be done by the new windows popup instance
 
@@ -1249,7 +1275,10 @@ class Topic {
     console.debug("Topic.moveToTrash() called for topicId=%d", this.id);
 
     // update Topic deleted field in DB
-    await dbUpdateTopic(this.id, {deleted: Date.now()});
+    let updated = await dbUpdateTopic(this.id, {deleted: Date.now(), windowId: undefined});
+    if (updated === 0) {
+      console.warn('moveToTrash(): failed to update topic %d!', this.id);
+    }
 
     this.pt.refSidebar.removeTopic({id: this.id});
 
@@ -1265,7 +1294,7 @@ class Topic {
       detail: {window: win}
     });
 
-    // reload this instance for easiness sake
+    // reload this instance for easiness sake (current window)
     await browser.tabs.reload();
   }
 
@@ -1369,17 +1398,18 @@ class BrowsingWindow {
 
   // Build title from tabs in the window: google.de +7 , or "New Window" for window without (real) tabs
   async constructWindowTitle() {
-    let title = "";
+    let title = new String('');
     let count = 0;
     let win = await browser.windows.get(this.id, {populate: true});
     for (let tab of win.tabs) {
       count++;
       if (tab.pinned === false) {
-        if (title === "") {
+        if (title.valueOf() === '') {
           try {
             let url = new URL(tab.url);
             //title = url.hostname.replace(/^www./, '').trunc(14);
             title = punycode.toUnicode(url.hostname).replace(/^www./, '').trunc(14);
+            console.debug('constructWindowTitle(): title set to "%s" (from tab=%s)', title, tab.url);
           } catch (err) {
             console.warn("BrowsingWindow.constructWindowTitle() %s", err);
             title = tab.url;
@@ -1387,7 +1417,7 @@ class BrowsingWindow {
         }
       }
     }
-    if (count <= 1) {
+    if (count <= 1 || title.valueOf() === '') {
       this.title = "New Window";
     } else if (count < 3) {
       this.title = title;
@@ -1443,14 +1473,13 @@ class BrowsingWindow {
       action: 'TopicAdd',
       detail: info
     });
-    // inform other instances about removed window (its now a topic)
+    // inform other instances about removed window as it is now a Topic (identified by this.id)
     browser.runtime.sendMessage({
       action: 'WindowRemoved',
-      detail: {windowId: info.id}
+      detail: {windowId: this.id, converted: true}
     });
 
-
-    // reload this instance
+    // reload this instance for easiness' sake
     await browser.tabs.reload();
   }
 }
@@ -1853,11 +1882,10 @@ class Tab {
   }
 
   update(ul, newTab, info) {
-    console.debug("Tab.update() update tab with id=%d, info=%O", this.id, info);
+    console.debug("Tab.update() update tab with id=%d", this.id);
     if (newTab) {
       this.tab = newTab;
     }
-
     if (info && 'status' in info) {
       if (info.status === 'complete') {
         this.spanTabTitle.innerText = newTab.title;

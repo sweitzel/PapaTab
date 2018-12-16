@@ -146,9 +146,7 @@ var papaTabs = (function () {
   //region handlers
 
   async function handleCreateWindow() {
-    let newWindow = await browser.windows.create({
-      url: browser.extension.getURL('popup.html'),
-    });
+    let newWindow = await browser.windows.create();
     if (newWindow) {
       await openPapaTab({windowId: newWindow.id});
     }

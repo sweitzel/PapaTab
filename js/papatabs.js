@@ -150,6 +150,10 @@ async function matchWindowToTopic(windowId) {
       // foreach tab >> tab URL equal?
       let topics = await dbGetTopicsAsArray();
       for (topic of topics) {
+        // deleted topic?
+        if ('deleted' in topic) {
+          continue;
+        }
         // amount of tabs equal?
         if (currentTabs.length !== topic.tabs.length) {
           console.log("matchWindowToTopic(): Topic tabs=%d, current tabs=%d -> no match.", topic.tabs.length, currentTabs.length);
@@ -160,16 +164,19 @@ async function matchWindowToTopic(windowId) {
           let tA = topic.tabs[i];
           let tB = currentTabs[i];
           if (tA.url === tB.url) {
-            console.log("MATCH topicUrl=%s, thisUrl=%s", tA.url, tB.url);
+            console.debug("MATCH topicUrl=%s, thisUrl=%s", tA.url, tB.url);
             match++;
           } else {
-            console.log("NOMATCH topicUrl=%s, thisUrl=%s", tA.url, tB.url);
+            console.debug("NOMATCH topicUrl=%s, thisUrl=%s", tA.url, tB.url);
             break;
           }
         }
         if (match === topic.tabs.length) {
           // found - update windowId in DB
-          await dbUpdateTopic(topic.id, {windowId: windowId});
+          let updated = await dbUpdateTopic(topic.id, {windowId: windowId});
+          if (updated === 0) {
+            console.warn("matchWindowToTopic(): failed to update topic windowId!");
+          }
           return topic;
         }
       }
@@ -290,6 +297,13 @@ function timeDifference(previous) {
   const elapsed = Math.round((current - previous));
 
   let lang = navigator.languages ? navigator.languages[0] : navigator.language;
+
+  // Intl.RelativeTimeForm is very new (as of 2018)
+  if (typeof Intl.RelativeTimeFormat !== 'function') {
+    console.warn('timeDifference(): Intl.RelativeTimeFormat not supported, returning default');
+    return Math.round(elapsed / msPerMinute) + " minutes ago" ;
+  }
+
   let rtf = new Intl.RelativeTimeFormat(lang);
 
   if (elapsed < msPerMinute) {
@@ -320,7 +334,7 @@ function timeDifference(previous) {
  */
 function sanitizeTabs(tabs) {
   // only save whitelisted information to DB
-  let keyWhitelist = ['active', 'favIconUrl', 'index', 'pinned', 'selected', 'title', 'url'];
+  let keyWhitelist = ['active', 'index', 'pinned', 'selected', 'title', 'url'];
 
   tabs.forEach((obj) => {
     Object.keys(obj).forEach((key) => {
