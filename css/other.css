@@ -74,7 +74,8 @@ ul {
 .tooltip#tipTopicColor:hover + .tooltiptext {
   visibility: visible;
 }
-/* input validation */
+
+/* invalid input shake */
 input:invalid {
   animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
   transform: translate3d(0, 0, 0);
@@ -213,8 +214,10 @@ input[type="search"]::-webkit-search-cancel-button {
   width: 10px;
 }
 
-
-/*section day/night toggle button Created By Joseph Shenton @TeamiHackify */
+/*
+ * day/night toggle button Created By Joseph Shenton @TeamiHackify
+ */
+/* region https://codemyui.com/day-night-toggle-switch-changes-background-color/ */
 .button-con {
   cursor: default;
   position: absolute;
@@ -301,4 +304,4 @@ input[type="search"]::-webkit-search-cancel-button {
 .toggle:checked + .toggle-button:after {
   left: 50%;
 }
-/*endsection*/
+/*endregion*/

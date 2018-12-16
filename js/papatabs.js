@@ -357,3 +357,17 @@ async function switchToWindow(nextOrLast) {
     }
   }
 }
+
+// get specified option from local storage
+async function getLocalConfig(key) {
+  let prop = await browser.storage.local.get([key]);
+  console.debug('getLocalConfig(%s): %O', key, prop);
+  return prop;
+}
+
+// store specified option (primitive type) in local storage
+function setLocalConfig(key, value) {
+  browser.storage.local.set({[key]: value})
+    .then(() => console.debug('setLocalConfig(%s): successfully saved (%s)', key, typeof value))
+    .catch(err => console.warn('setLocalConfig(%s) failed: %O', key, err));
+}

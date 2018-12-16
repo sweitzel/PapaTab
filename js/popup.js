@@ -440,16 +440,28 @@ class PopupMain {
     // themeSwitcher (maybe not the best location)
     let light = document.getElementById("lightTheme");
     let dark = document.getElementById("darkTheme");
+    // get theme state from storage area
     dark.disabled = true;
     light.disabled = false;
+    getLocalConfig('darkThemeEnabled')
+      .then((prop) => {
+        if ('darkThemeEnabled' in prop && prop['darkThemeEnabled'] === true) {
+          dark.disabled = false;
+          light.disabled = true;
+          butt.checked = true;
+        }
+      })
+      .catch(err => console.warn('drawTopicOptions(): Unable to get option from browser storage: %O', err));
     let butt = document.getElementById("cb1");
     butt.onclick = function () {
       if (butt.checked) {
         light.disabled = true;
         dark.disabled = false;
+        setLocalConfig('darkThemeEnabled', true);
       } else {
         light.disabled = false;
         dark.disabled = true;
+        setLocalConfig('darkThemeEnabled', false);
       }
     };
 
@@ -981,7 +993,7 @@ class Topic {
   add(ul) {
     this.li = document.createElement('li');
     this.li.classList.add('w3-bar', 'w3-button', 'w3-hover-theme', 'hidden-info');
-    this.li.style.padding = 'unset';
+    this.li.style.padding = '4px';
     this.li.style.lineHeight = '16px';
     this.li.style.height = '45px';
     this.li.style.width = '285px';
