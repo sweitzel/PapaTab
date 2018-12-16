@@ -3,13 +3,20 @@
 PapaTab is a browser extension intended to improve user experience for Tab- and Browsing Topic management.
 This page is mainly development related. For usage related information check the Extension Stores of the supported Browsers.
 
+## Screenshots (2018-12-16)
+Chrome:
+[[https://imgur.com/flapj6D|alt=Chrome]]
+Firefox:
+[[https://imgur.com/zueTQkG|alt=Firefox]]
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
 ### Supported Browsers
 
-Google Chrome is currently the only tested Browser. However generally by use of the "Browser" polyfill support for other Browsers is planned at least for Firefox.
+* Google Chrome (tested version >=71)
+* Mozilla Firefox (tested version >= 64)
 
 ## Contributing
 
