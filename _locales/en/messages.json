@@ -4,11 +4,11 @@
     "description": "Extension Name"
   },
   "appDesc": {
-    "message": "A browser extension for better management of tabs, especiall for users who like to have many tabs open (like my dad).",
+    "message": "A browser extension for better management of tabs, especially for users who like to have many tabs open (like my dad).",
     "description": "Extension Short Description"
   },
   "SearchBarPlaceholder": {
-    "message": "Search Tab Title or URL (also with 's')",
+    "message": "Search for Tabs (quick access with 's' key)",
     "description": "Main/Top: Search Bar Placeholder for entering the Tabs to look for"
   },
   "topics": {
@@ -70,6 +70,10 @@
   "Create": {
     "message": "Create",
     "description": "Modal: Create Topic"
+  },
+  "Open": {
+    "message": "Open",
+    "description": "General: Something is open"
   },
   "Close": {
     "message": "Close",

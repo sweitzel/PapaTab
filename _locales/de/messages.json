@@ -4,11 +4,11 @@
     "description": "Extension Name"
   },
   "appDesc": {
-    "message": "Eine Browser Erweiterung für besseres Tab Management, insbesondere für Personen welche gern viele Tabs offen haben (wie mein Papa).",
+    "message": "Eine Browser Erweiterung für besseres Tab Management, insbesondere für Personen welche gern viele Tabs offen haben (wie mei Papa).",
     "description": "Extension Short Description"
   },
   "SearchBarPlaceholder": {
-    "message": "Suche nach Tab Titel oder URL (auch mit 's')",
+    "message": "Suche nach Tabs (Schnellzugriff mit 's' Taste)",
     "description": "Main/Top: Search Bar Placeholder for entering the Tabs to look for"
   },
   "topics": {
@@ -66,6 +66,10 @@
   "Create": {
     "message": "Anlegen",
     "description": "Modal: Create Topic"
+  },
+  "Open": {
+    "message": "Offen",
+    "description": "General: Something is open"
   },
   "Close": {
     "message": "Schließen",

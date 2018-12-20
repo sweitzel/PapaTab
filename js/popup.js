@@ -201,17 +201,13 @@ class PopupSidebar {
    *   - For Topic update the Topic Info
    *   - For Windows update the Title
    */
-  updateTopicOrWindowInfo(windowId) {
-    console.debug("Sidebar.updateTopicOrWindowInfo(): Update info for window with id %d", windowId);
-    let topic = this.getTopicForWindowId(windowId);
+  updateWindowInfo(windowId) {
+    console.debug("Sidebar.updateWindowInfo(): Update info for window with id %d", windowId);
     let win = this.windows.find(win => win.id === windowId);
-    if (topic) {
-      // this would be redundant with updateInfo call from Tab.saveTabsToDb
-      //topic.updateInfo();
-    } else if (win) {
+    if (win) {
       win.updateWindowTitle();
     } else {
-      console.warn('PopupSidebar.updateTopicOrWindowInfo(): Neither Topic nor Window ' + windowId);
+      console.info('PopupSidebar.updateWindowInfo(): Window with id=%d does not exist', windowId);
     }
   }
 
@@ -296,7 +292,6 @@ class PopupSidebar {
           // if a Topic is loaded, WindowCreated will also be sent
           // Note: if WindowCreated happens before TopicLoaded, then windowId is unknown and this will not work here
           else if (topic = this.getTopicForWindowId(request.detail.window.id)) {
-            console.log("XXX WindowCreated -> set Topic Open (id=%d)", topic.id);
             topic.setOpen();
           }
           else {
@@ -316,9 +311,9 @@ class PopupSidebar {
             this.removeWindow(request.detail.windowId);
           }
           break;
-        case 'UpdateWindowOrTopicInfo':
-          console.debug("Chrome UpdateWindowOrTopicInfo received: detail=%O", request.detail);
-          this.updateTopicOrWindowInfo(request.detail.windowId);
+        case 'UpdateWindowInfo':
+          console.debug("Chrome UpdateWindowInfo received: detail=%O", request.detail);
+          this.updateWindowInfo(request.detail.windowId);
           break;
       }
     });
@@ -530,9 +525,9 @@ class PopupMain {
     let divOptionsRight = document.createElement('div');
     divOptionsRight.classList.add('w3-right');
 
-    // Trash
+    // Topic to Trash
     let iTrash = document.createElement('i');
-    iTrash.classList.add('w3-xxlarge', 'w3-padding-24', 'w3-margin-right', 'w3-text-theme', 'fa', 'fa-trash-alt', 'my-zoom-hover', 'tooltip')
+    iTrash.classList.add('w3-xxlarge', 'w3-padding-24', 'w3-margin-right', 'w3-text-theme', 'w3-hover-text-red', 'fa', 'fa-trash-alt', 'my-zoom-hover', 'tooltip');
     iTrash.id = 'tipTopicToTrash';
     let spanTrashTip = document.createElement('span');
     spanTrashTip.classList.add('tooltiptext', 'w3-text-theme-light');
@@ -665,7 +660,6 @@ class PopupMain {
       let tabs = await browser.tabs.query({currentWindow: true});
       let tabCount = tabs.length;
       for (let tab of tabs) {
-        console.log("xxx %d=%s", tab.index, tab.url);
         if (tab.url.startsWith('about:') || tab.url.startsWith('chrome://newtab')) {
           console.debug('restoreTabs() closed tab before restore: %d=%s', tab.index, tab.url);
           await browser.tabs.remove(tab.id);
@@ -704,6 +698,7 @@ class PopupMain {
 
   // updates the title according to which window or topic is open
   updateTitle(newTitle, newColor) {
+    document.title = newTitle;
     let title = document.createElement('h4');
     title.innerText = newTitle;
     if (newColor) {
@@ -915,9 +910,9 @@ class PopupMain {
             console.debug("Browser Event TabCreated received: detail=%O", request.detail);
             this.addTab(request.detail.tab);
             // update title (sidebar + main)
-            this.pt.refSidebar.updateTopicOrWindowInfo(request.detail.tab.windowId);
+            this.pt.refSidebar.updateWindowInfo(request.detail.tab.windowId);
             browser.runtime.sendMessage({
-              action: 'UpdateWindowOrTopicInfo',
+              action: 'UpdateWindowInfo',
               detail: {windowId: request.detail.tab.windowId}
             });
           }
@@ -927,9 +922,9 @@ class PopupMain {
             console.debug("Browser Event TabRemoved received: detail=%O", request.detail);
             this.removeTab(request.detail.tabId);
             // update title (sidebar + main)
-            this.pt.refSidebar.updateTopicOrWindowInfo(request.detail.removeInfo.windowId);
+            this.pt.refSidebar.updateWindowInfo(request.detail.removeInfo.windowId);
             browser.runtime.sendMessage({
-              action: 'UpdateWindowOrTopicInfo',
+              action: 'UpdateWindowInfo',
               detail: {windowId: request.detail.removeInfo.windowId}
             });
           }
@@ -939,9 +934,9 @@ class PopupMain {
             console.debug("Browser Event TabMoved received: detail=%O", request.detail);
             this.moveTab(request.detail.tabId, request.detail.moveInfo);
             // update title of other windows (sidebar + main)
-            this.pt.refSidebar.updateTopicOrWindowInfo(request.detail.moveInfo.windowId);
+            this.pt.refSidebar.updateWindowInfo(request.detail.moveInfo.windowId);
             browser.runtime.sendMessage({
-              action: 'UpdateWindowOrTopicInfo',
+              action: 'UpdateWindowInfo',
               detail: {windowId: request.detail.moveInfo.windowId}
             });
           }
@@ -953,9 +948,9 @@ class PopupMain {
             // changeInfo.status == Complete, URL/Title changed?
             if (request.detail.changeInfo && 'status' in request.detail.changeInfo && request.detail.changeInfo.status === 'complete') {
               // update title on other instances (sidebar + main)
-              this.pt.refSidebar.updateTopicOrWindowInfo(request.detail.tab.windowId);
+              this.pt.refSidebar.updateWindowInfo(request.detail.tab.windowId);
               browser.runtime.sendMessage({
-                action: 'UpdateWindowOrTopicInfo',
+                action: 'UpdateWindowInfo',
                 detail: {windowId: request.detail.tab.windowId}
               });
             }
@@ -1059,7 +1054,8 @@ class Topic {
     divStatus.classList.add('w3-bar-item', 'tabStatusBar');
 
     this.divTopicOpen = document.createElement('div');
-    this.divTopicOpen.innerText = 'open';
+    this.divTopicOpen.innerText = getTranslationFor('Open');
+    this.divTopicOpen.style.fontVariant = 'no-common-ligatures';
     this.divTopicOpen.classList.add('w3-tiny', 'w3-round-large', 'w3-badge', 'w3-card-4', 'w3-theme-d4', 'w3-display-right', 'w3-hide');
     divStatus.appendChild(this.divTopicOpen);
 
@@ -1145,7 +1141,6 @@ class Topic {
   setOpen() {
     console.debug("Topic(%d).setOpen() called", this.id);
     if (this.divTopicOpen) {
-      console.log("xxx REMOVED w3-hide from divTopicOpen");
       this.divTopicOpen.classList.remove('w3-hide');
     }
   }
@@ -1153,12 +1148,10 @@ class Topic {
   setClosed() {
     console.debug("Topic(%d).setClosed() called", this.id);
     if (this.divTopicOpen) {
-      console.log("xxx ADDED w3-hide to divTopicOpen %O", this.divTopicOpen);
       this.divTopicOpen.classList.add('w3-hide');
     }
     // update database entry
     dbUpdateTopic(this.id, {windowId: undefined}).then((updated) => {
-      console.log("xxx setClosed db updated (updated=%s)", updated);
       this.windowId = undefined;
     }).catch(err => console.warn('Topic.setClosed() problem: %O', err));
   }
@@ -1168,10 +1161,10 @@ class Topic {
    *   e.g. 'google.de +8 more tabs'
    */
   updateInfo() {
-    // update topic name
+    // update topic name if needed
     this.divTopicTitle.innerText = this.name;
     // update Icon
-    let favLink = createFavicon(this.name, this.color)
+    let favLink = createFavicon(this.name, this.color);
     if (favLink) {
       this.icon.setAttribute('src', favLink.href);
     }
@@ -1432,7 +1425,7 @@ class BrowsingWindow {
       let div = this.li.getElementsByTagName('div')[0];
       div.innerText = this.title;
       // update Sidebar Icon
-      let favLink = createFavicon(this.title.charAt(0).toUpperCase(), '#ccc')
+      let favLink = createFavicon(this.title.charAt(0).toUpperCase(), '#ccc');
       if (favLink) {
         this.icon.setAttribute('src', favLink.href);
       }
@@ -1551,7 +1544,7 @@ class ModalAddTopic {
     form.appendChild(divName);
 
     // section: color
-    let divColor = document.createElement('div')
+    let divColor = document.createElement('div');
     divColor.classList.add('w3-section');
     let labelColor = document.createElement('label');
     labelColor.innerText = getTranslationFor('modalTopicColor');
@@ -1688,20 +1681,22 @@ class Tab {
     // this.id is the Window Id
     this.li.setAttribute("id", "tab-" + this.id);
     this.li.style.padding = '1px 0px';
-    this.li.style.lineHeight = '15px';
+    this.li.style.lineHeight = '16px';
 
     // favicon image
     this.imgFavIcon = document.createElement('img');
     //try to get best favicon url path
     this.imgFavIcon.setAttribute('src', Tab.getFavIconSrc(this.tab.url, this.tab.favIconUrl));
     this.imgFavIcon.classList.add('w3-bar-item', 'w3-circle'); // 'w3-padding-small'
-    this.imgFavIcon.style.height = '42px';
+    this.imgFavIcon.style.height = '32px';
+    this.imgFavIcon.style.padding = '4px 4px 4px 16px';
     //this.imgFavIcon.style.verticalAlign = 'middle';
 
     // tab div
     let divTab = document.createElement('div');
     divTab.classList.add('w3-bar-item', 'w3-button', 'w3-left-align');
     divTab.style.width = '550px';
+    divTab.style.padding = '2px 0';
     this.spanTabTitle = document.createElement('span');
     this.spanTabTitle.classList.add('w3-medium', 'truncate');
     this.spanTabTitle.style.width = '500px';
@@ -2063,19 +2058,21 @@ class FavoriteTab {
     this.li = document.createElement('li');
     this.li.classList.add('w3-bar', 'hidden-info');
     this.li.style.padding = '1px 0px';
-    this.li.style.lineHeight = '15px';
+    this.li.style.lineHeight = '16px';
 
     // favicon image
     this.imgFavIcon = document.createElement('img');
     //try to get best favicon url path
     this.imgFavIcon.setAttribute('src', this.favSrc);
     this.imgFavIcon.classList.add('w3-bar-item', 'w3-circle'); // 'w3-padding-small'
-    this.imgFavIcon.style.height = '42px';
+    this.imgFavIcon.style.height = '32px';
+    this.imgFavIcon.style.padding = '4px 16px';
 
     // tab div
     let divTab = document.createElement('div');
     divTab.classList.add('w3-bar-item', 'w3-button', 'w3-left-align');
     divTab.style.width = '550px';
+    divTab.style.padding = '2px 0';
     this.spanTabTitle = document.createElement('span');
     this.spanTabTitle.classList.add('w3-medium', 'truncate');
     this.spanTabTitle.style.width = '500px';

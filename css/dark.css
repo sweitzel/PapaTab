@@ -25,7 +25,7 @@
 
 body {color: #000 !important; background-image: linear-gradient(to left, #002333 10%, silver 80%)}
 #divSidebar {color: #fff !important; background-image: linear-gradient(to right, #002333 95%, silver 100%)}
-#divTop {color: #000 !important; background-image: linear-gradient(to right, #002333 95%, silver 100%)}
+#divTop {color: silver !important; background-color: #002333}
 #ulMainActiveTabs {background-color: #a0b0c094}
 #ulMainActiveTabs div:hover {background-color: #00000020 !important}
 #ulMainSavedTabs {background-color: #a0b0c094}

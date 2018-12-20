@@ -4,6 +4,13 @@
   src: url(../fonts/Raleway-v4020-Regular.otf);
 }
 
+@font-face {
+  font-family: 'Megrim';
+  font-weight: normal;
+  font-style: normal;
+  src: url('../fonts/Megrim-Medium.eot');
+}
+
 .tabsList {
   width: 800px;
 }
@@ -41,7 +48,6 @@ ul {
 /* Tooltip text */
 .tooltiptext {
   visibility: hidden;
-  padding: 5px 0;
   border-radius: 6px;
   position: absolute;
   z-index: 4;
@@ -101,8 +107,8 @@ input:invalid {
 
 .my-zoom-hover:hover {
   transition :transform 0.2s ease-in-out;
-  transform: scale(1.5);
-  opacity: 0.8 !important;
+  transform: scale3d(1.2, 1.2, 1.2);
+  filter: brightness(150%);
 }
 
 li.pinned:after {
