@@ -117,6 +117,17 @@ var papaTabs = (function () {
     }
   });
 
+  browser.runtime.onStartup.addListener(() => {
+    if (debug) {
+      console.debug('onStartup listener fired');
+    }
+    /*
+     * Close all pinned tabs in all open windows
+     *   When starting up, the Browser will restore pinned tabs (even if no session restore is enabled)
+     */
+    closeStartupTabs().catch(err => console.warn('onStartup() problem err=%O', err));
+  });
+
   //add listeners for message requests from other extension pages (popup.html)
   browser.runtime.onMessage.addListener((request, sender) => {
     if (debug) {
@@ -192,15 +203,20 @@ async function openPapaTab(param) {
     if ('autoDiscardable' in tabs[i]) {
       params['autoDiscardable'] = false;
     }
-    browser.tabs.update(tabs[i].id, params)
+    await browser.tabs.update(tabs[i].id, params)
       .then(console.debug("openPapaTab(): tab with id %d updated (pined...)", tabs[i].id))
       .catch(err => console.warn('openPapaTab() failed to update tab err=%O', err));
+    // always put PapaTab as first pinned tab
+    if (tabs[i].index != 0) {
+      await browser.tabs.move(tabs[i].id, {index: 0});
+    }
   }
   if (tabs.length === 0) {
     await browser.tabs.create({
       url: browser.extension.getURL('popup.html'),
       windowId: (param && 'windowId' in param) ? param.windowId : browser.windows.WINDOW_ID_CURRENT,
-      pinned: true
+      pinned: true,
+      index: 0
     });
   }
 }

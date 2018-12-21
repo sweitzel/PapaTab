@@ -375,11 +375,11 @@ class PopupMain {
     while (this.nodes.ulActiveTabs.firstChild) {
       this.nodes.ulActiveTabs.removeChild(this.nodes.ulActiveTabs.firstChild);
     }
+    this.nodes.ulActiveTabs.style.width = '800px';
     // add active tabs
     for (let tab of this.pt.whoIAm.currentWindow.tabs) {
       this.addTab(tab);
     }
-
     // apply Sortable.js to active tab list
     let options = {
       handle: '.drag-handle',
@@ -424,6 +424,7 @@ class PopupMain {
         while (this.nodes.ulSavedTabs.firstChild) {
           this.nodes.ulSavedTabs.removeChild(this.nodes.ulSavedTabs.firstChild);
         }
+        this.nodes.ulSavedTabs.style.width = '600px';
         // add saved/favorite tabs
         for (let savedTab of this.pt.whoIAm.currentTopic.favorites) {
           this.addFavoriteTab(savedTab);
@@ -1695,17 +1696,17 @@ class Tab {
     // tab div
     let divTab = document.createElement('div');
     divTab.classList.add('w3-bar-item', 'w3-button', 'w3-left-align');
-    divTab.style.width = '550px';
+    divTab.style.width = '70%';
     divTab.style.padding = '2px 0';
     this.spanTabTitle = document.createElement('span');
     this.spanTabTitle.classList.add('w3-medium', 'truncate');
-    this.spanTabTitle.style.width = '500px';
+    this.spanTabTitle.style.width = '95%';
     this.spanTabTitle.innerText = this.tab.title;
     this.spanTabUrl = document.createElement('span');
     this.spanTabUrl.classList.add('truncate');
     this.spanTabUrl.innerText = punycode.toUnicode(this.tab.url);
     this.spanTabUrl.classList.add('w3-small', 'hidden-text');
-    this.spanTabUrl.style.width = '500px';
+    this.spanTabUrl.style.width = '95%';
     divTab.appendChild(this.spanTabTitle);
     divTab.appendChild(document.createElement('br'));
     divTab.appendChild(this.spanTabUrl);
@@ -2071,17 +2072,17 @@ class FavoriteTab {
     // tab div
     let divTab = document.createElement('div');
     divTab.classList.add('w3-bar-item', 'w3-button', 'w3-left-align');
-    divTab.style.width = '550px';
+    divTab.style.width = '80%';
     divTab.style.padding = '2px 0';
     this.spanTabTitle = document.createElement('span');
     this.spanTabTitle.classList.add('w3-medium', 'truncate');
-    this.spanTabTitle.style.width = '500px';
+    this.spanTabTitle.style.width = '95%';
     this.spanTabTitle.innerText = this.title;
     this.spanTabUrl = document.createElement('span');
     this.spanTabUrl.classList.add('truncate');
     this.spanTabUrl.innerText = punycode.toUnicode(this.url);
     this.spanTabUrl.classList.add('w3-small', 'hidden-text');
-    this.spanTabUrl.style.width = '500px';
+    this.spanTabUrl.style.width = '95%';
     divTab.appendChild(this.spanTabTitle);
     divTab.appendChild(document.createElement('br'));
     divTab.appendChild(this.spanTabUrl);
@@ -2089,7 +2090,6 @@ class FavoriteTab {
     /* create status bar with various icons, these will be hidden by default */
     let divStatus = document.createElement('div');
     divStatus.classList.add('w3-right', 'tabStatusBar');
-    divStatus.style.width = '170px';
 
     // 'X' span
     this.imgTabClose = document.createElement('i');
@@ -2099,6 +2099,7 @@ class FavoriteTab {
     divStatus.appendChild(this.imgTabClose);
     let spanCloseHelp = document.createElement('span');
     spanCloseHelp.classList.add('tooltiptext', 'w3-half');
+    spanCloseHelp.style.right = '40px';
     spanCloseHelp.innerText = getTranslationFor('Remove');
     divStatus.appendChild(spanCloseHelp);
 
@@ -2228,7 +2229,7 @@ class FavoriteTab {
     if (topic) {
       ret.currentTopic = topic;
     }
-    console.debug("detectWhoIAm(): windowId=%d, Topic=%O", ret.currentWindow.id, ret.currentTopic);
+    console.debug("detectWhoIAm(): window=%O, Topic=%O", ret.currentWindow, ret.currentTopic);
     return ret;
   }
 
@@ -2236,9 +2237,6 @@ class FavoriteTab {
 
   document.addEventListener('DOMContentLoaded', function () {
     dbInit();
-  });
-
-  window.onload = function () {
     detectWhoIAm().then(whoIAm => {
       pt.whoIAm = whoIAm;
       // initialize / render sidebar
@@ -2253,9 +2251,10 @@ class FavoriteTab {
       pt.refMain = new PopupMain(pt);
       pt.refMain.registerEvents();
 
-      console.debug("window.onload() for window with id = %d completed.", pt.whoIAm.currentWindow.id);
+      console.debug("DOMContentLoaded handler for window with id = %d completed.", pt.whoIAm.currentWindow.id);
     }).catch(err => console.error(err));
 
     localizeHtmlPage();
-  };
+  });
+
 }());

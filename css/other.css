@@ -11,10 +11,6 @@
   src: url('../fonts/Megrim-Medium.eot');
 }
 
-.tabsList {
-  width: 800px;
-}
-
 /* truncate text in a div */
 .truncate {
   overflow: hidden;
@@ -56,6 +52,7 @@ ul {
   opacity: 0.5;
   font-size: 12px;
   background-color: unset !important;
+  white-space: nowrap;
 }
 
 /* Show the tooltip text when you mouse over the tooltip container */
