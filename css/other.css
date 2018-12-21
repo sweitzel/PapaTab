@@ -106,6 +106,7 @@ input:invalid {
   transition :transform 0.2s ease-in-out;
   transform: scale3d(1.2, 1.2, 1.2);
   filter: brightness(150%);
+  cursor: pointer;
 }
 
 li.pinned:after {
