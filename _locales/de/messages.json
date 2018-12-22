@@ -99,6 +99,14 @@
     "message": "Erstellt",
     "description": "General: Created"
   },
+  "NewWindow": {
+    "message": "Neues Fenster",
+    "description": "General: New Window"
+  },
+  "NewTab": {
+    "message": "Neuer Tab",
+    "description": "General: New Tab"
+  },
   "topicAddFailed": {
     "message": "Thema kann nicht gespeichert werden, bitte korrigieren sie den Namen.",
     "description": "Modal: Adding Topic Failed"

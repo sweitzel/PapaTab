@@ -104,22 +104,9 @@ var papaTabs = (function () {
     }).catch(err => console.error('window created - openPapaTab failed: %O', err));
   });
 
-  //add listeners for tab and window focus changes
-  //when a tab or window is changed, close the move tab popup if it is open
-  browser.windows.onFocusChanged.addListener(function (windowId) {
-    if (debug) {
-      console.debug('window(%d).onFocusChanged listener fired', windowId);
-    }
-    // Prevent a click in the popup on Ubuntu or ChromeOS from closing the
-    // popup prematurely.
-    if (windowId === browser.windows.WINDOW_ID_NONE) {
-      return;
-    }
-  });
-
   browser.runtime.onStartup.addListener(() => {
     if (debug) {
-      console.debug('onStartup listener fired');
+      console.debug('browser.onStartup listener fired');
     }
     /*
      * Close all pinned tabs in all open windows
@@ -131,7 +118,7 @@ var papaTabs = (function () {
   //add listeners for message requests from other extension pages (popup.html)
   browser.runtime.onMessage.addListener((request, sender) => {
     if (debug) {
-      console.debug('onMessage listener fired: request=%O, sender=%O', request, sender);
+      console.debug('runtime.onMessage listener fired: request=%O, sender=%O', request, sender);
     }
     // endpoints called by popup.js
     switch (request.action) {
@@ -162,9 +149,6 @@ var papaTabs = (function () {
 
   async function handleCreateWindow() {
     let newWindow = await browser.windows.create();
-    if (newWindow) {
-      //await openPapaTab({windowId: newWindow.id});
-    }
     return newWindow.id;
   }
 
@@ -199,15 +183,15 @@ async function openPapaTab(param) {
       highlighted: true,
       active: true
     };
-    // autoDiscardable not supported on all browsers
+    // autoDiscardable not supported by all browsers
     if ('autoDiscardable' in tabs[i]) {
       params['autoDiscardable'] = false;
     }
     await browser.tabs.update(tabs[i].id, params)
-      .then(console.debug("openPapaTab(): tab with id %d updated (pined...)", tabs[i].id))
+      .then(console.debug("openPapaTab(): tab with id %d updated (pinned...)", tabs[i].id))
       .catch(err => console.warn('openPapaTab() failed to update tab err=%O', err));
     // always put PapaTab as first pinned tab
-    if (tabs[i].index != 0) {
+    if (tabs[i].index !== 0) {
       await browser.tabs.move(tabs[i].id, {index: 0});
     }
   }

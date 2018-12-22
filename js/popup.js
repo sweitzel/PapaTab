@@ -284,7 +284,7 @@ class PopupSidebar {
           }
           break;
         case 'WindowCreated':
-          console.debug("Browser event WindowCreated received: detail=%O, topics=%O", request.detail, this.topics);
+          console.debug("Custom WindowCreated event received: detail=%O, topics=%O", request.detail, this.topics);
           if (this.windows.find(win => win.id === request.detail.window.id)) {
             // when a session is restored, the windows are open but WindowCreated is sent again
             console.debug("Ignored WindowCreated event for existing window id (%d)", request.detail.window.id);
@@ -299,7 +299,7 @@ class PopupSidebar {
           }
           break;
         case 'WindowRemoved':
-          console.debug("Browser WindowRemoved received: detail=%O", request.detail);
+          console.debug("Custom WindowRemoved event received: detail=%O", request.detail);
           if ('converted' in request.detail) {
             // a Topic can be converted to a Window, in that case WindowRemoved should not touch the Topic
             this.removeWindow(request.detail.windowId);
@@ -312,7 +312,7 @@ class PopupSidebar {
           }
           break;
         case 'UpdateWindowInfo':
-          console.debug("Chrome UpdateWindowInfo received: detail=%O", request.detail);
+          console.debug("Custom UpdateWindowInfo event received: detail=%O", request.detail);
           this.updateWindowInfo(request.detail.windowId);
           break;
       }
@@ -385,19 +385,19 @@ class PopupMain {
       handle: '.drag-handle',
       draggable: '.can-be-dragged',
       onAdd: function (evt) {
-        console.log('onAdd.Tab:', [evt.item, evt.from]);
+        console.debug('onAdd.Tab:', [evt.item, evt.from]);
       },
       onRemove: function (evt) {
-        console.log('onRemove.Tab:', [evt.item, evt.from]);
+        console.debug('onRemove.Tab:', [evt.item, evt.from]);
       },
       onStart: function (evt) {
-        console.log('onStart.Tab:', [evt.item, evt.from]);
+        console.debug('onStart.Tab:', [evt.item, evt.from]);
       },
       onSort: function (evt) {
-        console.log('onSort.Tab:', [evt.item, evt.from]);
+        console.debug('onSort.Tab:', [evt.item, evt.from]);
       },
       onEnd: function (evt) {
-        console.log('onEnd.Tab:', [evt.item, evt.from])
+        console.debug('onEnd.Tab:', [evt.item, evt.from])
       },
       onUpdate: (evt) => {
         // same window (from = to)?
@@ -1412,7 +1412,7 @@ class BrowsingWindow {
       }
     }
     if (count <= 1 || title.valueOf() === '') {
-      this.title = "New Window";
+      this.title = getTranslationFor('newWindow');
     } else if (count < 3) {
       this.title = title;
     } else {

@@ -103,6 +103,14 @@
     "message": "Created",
     "description": "General: Created"
   },
+  "NewWindow": {
+    "message": "New Window",
+    "description": "General: New Window"
+  },
+  "NewTab": {
+    "message": "New Tab",
+    "description": "General: New Tab"
+  },
   "topicAddFailed": {
     "message": "Unable to store Topic. Please check the name and try again.",
     "description": "Modal: Adding Topic Failed"

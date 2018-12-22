@@ -393,7 +393,6 @@ function setLocalConfig(key, value) {
  */
 async function closeStartupTabs() {
   let windows = await browser.windows.getAll({populate: false, windowTypes: ['normal']});
-  console.log("xxx windows = %O", windows);
   if (!windows || windows.length > 1) {
     // more than one window - session restore is active
     return;
@@ -403,7 +402,6 @@ async function closeStartupTabs() {
   let normalTabs = await browser.tabs.query({pinned:false, windowId: win.id});
   // only close pinned tabs if this is a new session (the only normalTab should be a new tab)
   if (normalTabs.length === 1 && (normalTabs[0].url.startsWith('about:') || normalTabs[0].url.startsWith('chrome://newtab'))) {
-    console.log("xxx REMOVE win=%d pinnedTabs=%O, normalTabs=%O", win.id, pinnedTabs, normalTabs);
     await browser.tabs.remove(pinnedTabs.map((tab) => { return tab.id }));
   }
 }
