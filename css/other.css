@@ -49,10 +49,13 @@ ul {
   z-index: 4;
   top: 26px;
   right: 2%;
-  opacity: 0.5;
   font-size: 12px;
-  background-color: unset !important;
   white-space: nowrap;
+  margin-right: 20px;
+  margin-top: -20px;
+  user-select: none;
+  text-shadow: 1px 1px 2px #FFFFFF;
+  background-color: unset !important;
 }
 
 /* Show the tooltip text when you mouse over the tooltip container */
@@ -139,6 +142,7 @@ li.pinned:after {
 .tabStatusBar {
   position: absolute;
   right: 5px;
+  height: 90%;
 }
 
 .mainHeader h4 {

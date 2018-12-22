@@ -41,16 +41,16 @@
 <div id="divSidebar" class="w3-sidebar w3-collapse w3-animate-left"
      style="z-index:3;width:300px;overflow-x:hidden;">
   <nav id="navSidebar">
-    <div>
+    <div style="width:95%">
       <div class="w3-border-bottom w3-large w3-margin-bottom tooltip">
         <span class="w3-margin-left" data-localize="__MSG_Topics__">Topics</span>
-        <i id="butAddTopic" class="w3-right w3-padding my-zoom-hover fa fa-plus-circle"></i>
+        <i id="butAddTopic" class="w3-right my-zoom-hover fa fa-plus-circle" style="padding-top:5px"></i>
         <span class="tooltiptext" data-localize="__MSG_AddNewTopic__">Add a new Topic</span>
       </div>
       <ul id="ulSidebarTopics"></ul>
       <div class="w3-border-bottom w3-large w3-margin-top w3-margin-bottom tooltip">
         <span class="w3-margin-left" data-localize="__MSG_Windows__">Windows</span>
-        <i id="butAddWindow" class="w3-right w3-padding my-zoom-hover fa fa-plus-circle"></i>
+        <i id="butAddWindow" class="w3-right my-zoom-hover fa fa-plus-circle" style="padding-top:5px"></i>
         <span class="tooltiptext" data-localize="__MSG_AddNewWindow__">Add a new Window</span>
       </div>
       <ul id="ulSidebarWindows"></ul>
@@ -96,7 +96,11 @@
     <div id="divOptions"></div>
     <div class="flex-container">
       <div id="divMainOpenTabs" style="padding: 10px">
-        <div class="w3-border-bottom w3-large w3-margin-bottom" data-localize="__MSG_OpenTabs__">Open Tabs</div>
+        <div class="w3-border-bottom w3-large w3-margin-bottom tooltip">
+          <span data-localize="__MSG_OpenTabs__">Open Tabs</span>
+          <i id="butAddTab" class="w3-right my-zoom-hover fa fa-plus-circle" style="padding-top:5px;color:#fff"></i>
+          <span class="tooltiptext" data-localize="__MSG_NewTab__" style="color:#fff">Add a new Tab</span>
+        </div>
         <ul id="ulMainActiveTabs" class="w3-ul w3-card w3-large"></ul>
       </div>
       <div id="divMainSavedTabs" style="margin: 10px">

@@ -324,7 +324,7 @@ class PopupSidebar {
     });
 
     // when add window button clicked
-    this.nodes.butAddWindow.addEventListener('click', function () {
+    this.nodes.butAddWindow.addEventListener('click', () => {
       // Send global CreateWindow event
       browser.runtime.sendMessage({
         action: 'CreateWindow'
@@ -350,6 +350,7 @@ class PopupMain {
       header: document.getElementById('hMainHeader'),
       ulActiveTabs: document.getElementById('ulMainActiveTabs'),
       ulSavedTabs: document.getElementById('ulMainSavedTabs'),
+      butAddTab: document.getElementById('butAddTab'),
       inputSearchBar: document.getElementById('inputSearchBar')
     };
     // store instances of Tab, with index = tab.id
@@ -478,8 +479,8 @@ class PopupMain {
       let spanConvertHelp = document.createElement('span');
       spanConvertHelp.classList.add('tooltiptext', 'w3-text-theme-light');
       spanConvertHelp.innerText = getTranslationFor("tipSaveAsTopic");
-      spanConvertHelp.style.top = '65px';
-      spanConvertHelp.style.right = '100px';
+      spanConvertHelp.style.top = '130px';
+      spanConvertHelp.style.right = '0';
 
       divConvert.addEventListener('click', (e) => {
         e.preventDefault();
@@ -487,9 +488,12 @@ class PopupMain {
         let browsingWindow = this.pt.refSidebar.windows.find(win => win.id === this.pt.whoIAm.currentWindow.id);
         if (browsingWindow) {
           // call convert
-          browsingWindow.saveAsTopic().then().catch(err => console.warn('PopupMain converting window to topic failed: %O', err));
+          browsingWindow.saveAsTopic()
+            .then()
+            .catch(err => console.warn('PopupMain converting window to topic failed: %O', err));
         } else {
-          console.warn("Cannot convert Window to Topic, window not found in %O (current=%O)", this.pt.refSidebar.windows, this.pt.whoIAm.currentWindow)
+          console.warn("Cannot convert Window to Topic, window not found in %O (current=%O)",
+            this.pt.refSidebar.windows, this.pt.whoIAm.currentWindow)
         }
       });
 
@@ -532,8 +536,8 @@ class PopupMain {
     iTrash.id = 'tipTopicToTrash';
     let spanTrashTip = document.createElement('span');
     spanTrashTip.classList.add('tooltiptext', 'w3-text-theme-light');
-    spanTrashTip.style.right = '80px';
-    spanTrashTip.style.top = '131px';
+    spanTrashTip.style.right = '40px';
+    spanTrashTip.style.top = '150px';
     spanTrashTip.innerText = getTranslationFor('tipMoveTopicToTrash', 'Move Topic to Trash');
 
     divOptionsRight.appendChild(iTrash);
@@ -551,8 +555,8 @@ class PopupMain {
     inputColor.style.cursor = 'pointer';
     let spanColorTip = document.createElement('span');
     spanColorTip.classList.add('tooltiptext', 'w3-text-theme-light');
-    spanColorTip.style.right = '25px';
-    spanColorTip.style.top = '130px';
+    spanColorTip.style.right = '20px';
+    spanColorTip.style.top = '150px';
     spanColorTip.innerText = getTranslationFor('tipChangeTopicColor', 'Change topic color');
 
     divOptionsRight.appendChild(inputColor);
@@ -968,6 +972,13 @@ class PopupMain {
           break;
       }
     });
+
+    // when add tab button clicked
+    this.nodes.butAddTab.addEventListener('click',() => {
+      browser.tabs.create({})
+        .then()
+        .catch(err => console.warn('Tab creation problem: %O', err));
+    });
   }
 }
 
@@ -1368,7 +1379,7 @@ class BrowsingWindow {
     });
 
     // activate the window
-    this.li.onclick = (e) => {
+    this.li.addEventListener('click', (e) => {
       e.preventDefault();
       browser.windows.update(this.id, {focused: true})
         .then(() => {
@@ -1376,7 +1387,7 @@ class BrowsingWindow {
           bg.openPapaTab({windowId: this.id});
         })
         .catch(err => console.error("BrowsingWindow activate failed: %s", err));
-    };
+    });
 
     this.li.appendChild(this.icon);
     this.li.appendChild(divWindow);
@@ -1682,7 +1693,7 @@ class Tab {
     // this.id is the Window Id
     this.li.setAttribute("id", "tab-" + this.id);
     this.li.style.padding = '1px 0px';
-    this.li.style.lineHeight = '16px';
+    this.li.style.lineHeight = '13px';
 
     // favicon image
     this.imgFavIcon = document.createElement('img');
@@ -1697,19 +1708,27 @@ class Tab {
     let divTab = document.createElement('div');
     divTab.classList.add('w3-bar-item', 'w3-button', 'w3-left-align');
     divTab.style.width = '70%';
+    divTab.style.height = '32px';
     divTab.style.padding = '2px 0';
     this.spanTabTitle = document.createElement('span');
     this.spanTabTitle.classList.add('w3-medium', 'truncate');
     this.spanTabTitle.style.width = '95%';
+    this.spanTabTitle.style.height = '55%';
     this.spanTabTitle.innerText = this.tab.title;
     this.spanTabUrl = document.createElement('span');
     this.spanTabUrl.classList.add('truncate');
     this.spanTabUrl.innerText = punycode.toUnicode(this.tab.url);
     this.spanTabUrl.classList.add('w3-small', 'hidden-text');
     this.spanTabUrl.style.width = '95%';
+    this.spanTabUrl.style.height = '45%';
     divTab.appendChild(this.spanTabTitle);
     divTab.appendChild(document.createElement('br'));
     divTab.appendChild(this.spanTabUrl);
+
+    let statusTipMargin = '75px';
+    if (this.pt.whoIAm && typeof this.pt.whoIAm.currentTopic !== 'undefined') {
+      statusTipMargin = '100px'
+    }
 
     /* create status bar with various icons, these will be hidden by default */
     let divStatus = document.createElement('div');
@@ -1730,7 +1749,8 @@ class Tab {
     this.imgTabPinned.classList.add('w3-large', 'w3-padding-small', 'fas', 'fa-thumbtack', 'tooltip', 'my-zoom-hover');
     divStatus.appendChild(this.imgTabPinned);
     this.spanPinHelp = document.createElement('span');
-    this.spanPinHelp.classList.add('tooltiptext', 'w3-half');
+    this.spanPinHelp.style.marginRight = statusTipMargin;
+    this.spanPinHelp.classList.add('tooltiptext');
     divStatus.appendChild(this.spanPinHelp);
 
     // handle Topic tab favorites
@@ -1740,7 +1760,8 @@ class Tab {
       this.imgTabFavorite.classList.add('w3-large', 'w3-padding-small', 'fas', 'fa-star', 'tooltip', 'my-zoom-hover');
       divStatus.appendChild(this.imgTabFavorite);
       this.spanFavoriteHelp = document.createElement('span');
-      this.spanFavoriteHelp.classList.add('tooltiptext', 'w3-half');
+      this.spanFavoriteHelp.style.marginRight = statusTipMargin;
+      this.spanFavoriteHelp.classList.add('tooltiptext');
       divStatus.appendChild(this.spanFavoriteHelp);
       this.imgTabFavorite.style.opacity = '0.05';
       this.spanFavoriteHelp.innerText = getTranslationFor('SaveTab');
@@ -1763,7 +1784,8 @@ class Tab {
     this.imgTabClose.style.opacity = '0.6';
     divStatus.appendChild(this.imgTabClose);
     let spanCloseHelp = document.createElement('span');
-    spanCloseHelp.classList.add('tooltiptext', 'w3-half');
+    spanCloseHelp.classList.add('tooltiptext');
+    spanCloseHelp.style.marginRight = statusTipMargin;
     spanCloseHelp.innerText = getTranslationFor('Close');
     divStatus.appendChild(spanCloseHelp);
 
@@ -2059,7 +2081,7 @@ class FavoriteTab {
     this.li = document.createElement('li');
     this.li.classList.add('w3-bar', 'hidden-info');
     this.li.style.padding = '1px 0px';
-    this.li.style.lineHeight = '16px';
+    this.li.style.lineHeight = '13px';
 
     // favicon image
     this.imgFavIcon = document.createElement('img');
@@ -2067,7 +2089,7 @@ class FavoriteTab {
     this.imgFavIcon.setAttribute('src', this.favSrc);
     this.imgFavIcon.classList.add('w3-bar-item', 'w3-circle'); // 'w3-padding-small'
     this.imgFavIcon.style.height = '32px';
-    this.imgFavIcon.style.padding = '4px 16px';
+    this.imgFavIcon.style.padding = '2px 16px';
 
     // tab div
     let divTab = document.createElement('div');
@@ -2077,12 +2099,14 @@ class FavoriteTab {
     this.spanTabTitle = document.createElement('span');
     this.spanTabTitle.classList.add('w3-medium', 'truncate');
     this.spanTabTitle.style.width = '95%';
+    this.spanTabTitle.style.height = '55%';
     this.spanTabTitle.innerText = this.title;
     this.spanTabUrl = document.createElement('span');
     this.spanTabUrl.classList.add('truncate');
     this.spanTabUrl.innerText = punycode.toUnicode(this.url);
     this.spanTabUrl.classList.add('w3-small', 'hidden-text');
     this.spanTabUrl.style.width = '95%';
+    this.spanTabUrl.style.height = '45%';
     divTab.appendChild(this.spanTabTitle);
     divTab.appendChild(document.createElement('br'));
     divTab.appendChild(this.spanTabUrl);
@@ -2098,8 +2122,8 @@ class FavoriteTab {
     this.imgTabClose.style.opacity = '0.6';
     divStatus.appendChild(this.imgTabClose);
     let spanCloseHelp = document.createElement('span');
-    spanCloseHelp.classList.add('tooltiptext', 'w3-half');
-    spanCloseHelp.style.right = '40px';
+    spanCloseHelp.classList.add('tooltiptext');
+    spanCloseHelp.style.right = '20px';
     spanCloseHelp.innerText = getTranslationFor('Remove');
     divStatus.appendChild(spanCloseHelp);
 

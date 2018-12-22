@@ -40,7 +40,7 @@
     "description": "Main: Save/Convert Window as Topic"
   },
   "tipChangeTopicColor": {
-    "message": "Change topic color",
+    "message": "Change color",
     "description": "Main: Change topic color"
   },
   "tipMoveTopicToTrash": {
