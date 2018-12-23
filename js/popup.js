@@ -1701,7 +1701,7 @@ class Tab {
     this.imgFavIcon.setAttribute('src', Tab.getFavIconSrc(this.tab.url, this.tab.favIconUrl));
     this.imgFavIcon.classList.add('w3-bar-item', 'w3-circle'); // 'w3-padding-small'
     this.imgFavIcon.style.height = '32px';
-    this.imgFavIcon.style.padding = '4px 4px 4px 16px';
+    this.imgFavIcon.style.padding = '4px 4px 4px 12px';
     //this.imgFavIcon.style.verticalAlign = 'middle';
 
     // tab div
@@ -2089,7 +2089,7 @@ class FavoriteTab {
     this.imgFavIcon.setAttribute('src', this.favSrc);
     this.imgFavIcon.classList.add('w3-bar-item', 'w3-circle'); // 'w3-padding-small'
     this.imgFavIcon.style.height = '32px';
-    this.imgFavIcon.style.padding = '2px 16px';
+    this.imgFavIcon.style.padding = '4px 12px';
 
     // tab div
     let divTab = document.createElement('div');
