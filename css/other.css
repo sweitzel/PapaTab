@@ -31,10 +31,6 @@ ul {
   list-style: none;
 }
 
-.fa-plus-circle:hover {
-  color: #bbb;
-}
-
 /* Tooltip container */
 .tooltip {
   position: relative;
@@ -105,11 +101,15 @@ input:invalid {
   }
 }
 
+.my-zoom-hover {
+  opacity: 0.5;
+  cursor: pointer;
+}
+
 .my-zoom-hover:hover {
   transition :transform 0.2s ease-in-out;
   transform: scale3d(1.2, 1.2, 1.2);
   opacity: 1.0 !important;
-  cursor: pointer;
 }
 
 li.pinned:after {
